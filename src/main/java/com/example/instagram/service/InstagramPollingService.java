@@ -34,7 +34,7 @@ public class InstagramPollingService {
     // -------------------------------------------------------------------------
     public InstagramResponseDto fetchInstagramComments() throws Exception {
 
-        String fields = URLEncoder.encode("id,text,timestamp,from{id}", "UTF-8");
+        String fields = URLEncoder.encode("id,media_type,media_url,thumbnail_url,caption,permalink,timestamp,username,like_count,comments{id,text,timestamp,from{id,username},replies{id,text,timestamp,from{id,username}}}", "UTF-8");
 
         String url =
                 "https://graph.facebook.com/v19.0/" + igUserId +
