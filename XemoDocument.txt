@@ -1,0 +1,52 @@
+To work with the Instagram Graph API, follow the steps below:
+1.	Create a Facebook Page
+First, we need to create a Facebook Page. After creating the page, we will get the Page ID.
+Example:
+Page Name: XemoMedia
+Page ID: 840692872469357
+Owned by: Dharmendra Kumar
+
+2.	Get the Instagram Business Account ID
+Use the Page ID in the following URL to fetch the instagram_business_account:
+3.	https://graph.facebook.com/v19.0/840692872469357?fields=instagram_business_account&access_token=EAAcRzrg2HDcBP0PiuLHPb8EiXk9d1z8ZC295qWqi0FMdrw7YgwLLtDVmAN0UpUpq6D8wBg6EJQ50WtRecQRqIAM69Incsb0omkrvZBZCrGQhOyV96Q1eLrAv7euwSXpRB7CLmcZBZB6yTOo0evQv2zohcKZCAAnABL1MELd8D4J1IiTVqjIAVh3tzTrx1qqRv8eZC1mbqhtQDjNx0MQnjBFMlVmn1BCoSZCUPNzewTwtESPnDAZDZD
+
+Sample Response:
+{
+  "instagram_business_account": {
+    "id": "17841478600300872"
+  },
+  "id": "840692872469357"
+}
+
+4.	Generate Access Token
+The access token must be generated from the Facebook Developer account using the Graph API.
+
+5.	Get Instagram Posts (Media IDs)
+
+Use the Instagram Business Account ID in the below URL to get all post/media IDs:
+6.	https://graph.facebook.com/v19.0/17841478600300872/media?fields=id,caption&access_token=EAAcRzrg2HDcBP0PiuLHPb8EiXk9d1z8ZC295qWqi0FMdrw7YgwLLtDVmAN0UpUpq6D8wBg6EJQ50WtRecQRqIAM69Incsb0omkrvZBZCrGQhOyV96Q1eLrAv7euwSXpRB7CLmcZBZB6yTOo0evQv2zohcKZCAAnABL1MELd8D4J1IiTVqjIAVh3tzTrx1qqRv8eZC1mbqhtQDjNx0MQnjBFMlVmn1BCoSZCUPNzewTwtESPnDAZDZD
+
+Sample Output (Two Post IDs):
+{
+  "data": [
+    { "id": "18037309742709143" },
+    { "id": "18079423766135553" }
+  ]
+}
+
+7.	Get Comments for Each Post
+You can fetch the comments for each post using the Post ID.
+
+Post 1 (ID: 18037309742709143):
+https://graph.facebook.com/v19.0/18037309742709143/comments?access_token=EAAcRzrg2HDcBP0PiuLHPb8EiXk9d1z8ZC295qWqi0FMdrw7YgwLLtDVmAN0UpUpq6D8wBg6EJQ50WtRecQRqIAM69Incsb0omkrvZBZCrGQhOyV96Q1eLrAv7euwSXpRB7CLmcZBZB6yTOo0evQv2zohcKZCAAnABL1MELd8D4J1IiTVqjIAVh3tzTrx1qqRv8eZC1mbqhtQDjNx0MQnjBFMlVmn1BCoSZCUPNzewTwtESPnDAZDZD&limit=50&fields=id,text,timestamp,from{id}
+
+Post 2 (ID: 18079423766135553):
+https://graph.facebook.com/v19.0/18079423766135553/comments?access_token=EAAcRzrg2HDcBP0PiuLHPb8EiXk9d1z8ZC295qWqi0FMdrw7YgwLLtDVmAN0UpUpq6D8wBg6EJQ50WtRecQRqIAM69Incsb0omkrvZBZCrGQhOyV96Q1eLrAv7euwSXpRB7CLmcZBZB6yTOo0evQv2zohcKZCAAnABL1MELd8D4J1IiTVqjIAVh3tzTrx1qqRv8eZC1mbqhtQDjNx0MQnjBFMlVmn1BCoSZCUPNzewTwtESPnDAZDZD&limit=50&fields=id,text,timestamp,from{id}
+
+
+
+
+
+
+
+
