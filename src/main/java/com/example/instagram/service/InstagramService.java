@@ -64,11 +64,11 @@ public class InstagramService {
 		return dto;
 	}
 
-//	public InstagramMediaListResponseDto fetchInstagramMediaList(String igUserId, String accessToken) throws Exception {
-//		String fields = "id,caption,timestamp";
-//		String json = feignClient.fetchMediaList(igAccountId, fields, accessToken);
-//		return mapper.readValue(json, InstagramMediaListResponseDto.class);
-//	}
+	public InstagramMediaListResponseDto fetchInstagramMediaList(String igAccountId, String accessToken) throws Exception {
+		String fields = "id,caption,timestamp";
+		String json = feignClient.fetchMediaList(igAccountId, fields, accessToken);
+		return mapper.readValue(json, InstagramMediaListResponseDto.class);
+	}
 
 	private void saveInstagramMedia(InstagramResponseDto dto) {
 
