@@ -7,11 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import com.example.instagram.dto.FbTokenResponseDto;
 import com.example.instagram.service.FacebookPageService;
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -27,21 +29,21 @@ public class FacebookPageController {
 	public JsonNode getPagesWithInstagram() throws Exception {
 		return fbService.fetchPagesWithInstagram();
 	}
-	
-	 @GetMapping("/oauth/login")
-	    public ResponseEntity<Map<String, String>> loginUrl() {
-	        return ResponseEntity.ok(Map.of("login_url", fbService.generateLoginUrl()));
-	    }
 
-	    @GetMapping("/oauth/exchange")
-	    public ResponseEntity<?> exchange(@RequestParam(required = true) String code) {
-	        try {
-	            Map<String,Object> token = fbService.exchangeCodeForLongLivedToken(code);
-	            return ResponseEntity.ok(token);
-	        } catch (Exception e) {
-	            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
-	        }
-	    }
+	@GetMapping("/oauth/login")
+	public ResponseEntity<Map<String, String>> loginUrl() {
+		return ResponseEntity.ok(Map.of("login_url", fbService.generateLoginUrl()));
+	}
+
+	@GetMapping("/oauth/exchange")
+	public ResponseEntity<?> exchange(@RequestParam(required = true) String code) {
+		try {
+			Map<String, Object> token = fbService.exchangeCodeForLongLivedToken(code);
+			return ResponseEntity.ok(token);
+		} catch (Exception e) {
+			return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+		}
+	}
 
 	@GetMapping("/instagram-account")
 	public ResponseEntity<?> getInstagramBusinessAccountId(@RequestParam("accessToken") String accessToken,
@@ -60,4 +62,19 @@ public class FacebookPageController {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
 		}
 	}
+	
+	@GetMapping("/token/{appId}")
+	public ResponseEntity<?> getToken(@PathVariable String appId) {
+
+	    FbTokenResponseDto dto = fbService.getTokenInfo(appId);
+
+	    if (dto == null) {
+	        return ResponseEntity.status(404)
+	                .body("Token not found for appId: " + appId);
+	    }
+
+	    return ResponseEntity.ok(dto);
+	}
+
+
 }

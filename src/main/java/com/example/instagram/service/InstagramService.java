@@ -75,6 +75,7 @@ public class InstagramService {
 
 	    if (mediaItems.isEmpty()) {
 	        // If table empty  use igUserId and fetch only once
+	    	
 	        String json = feignClient.fetchMedia(igUserId, accessToken, FIELDS);
 
 	        InstagramResponseDto dto = mapper.readValue(json, InstagramResponseDto.class);

@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import com.example.instagram.dto.FbTokenResponseDto;
 import com.example.instagram.entity.FacebookToken;
 import com.example.instagram.repository.FacebookTokenRepository;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -187,6 +188,20 @@ public class FacebookPageService {
 		token.setExpiresIn(LocalDateTime.now().plusSeconds(expiresInSeconds));
 
 		tokenRepo.save(token);
+	}
+	
+	public FbTokenResponseDto getTokenInfo(String appId) {
+		FacebookToken token = tokenRepo.findFirstByAppIdOrderByCreatedAtDesc(appId)
+	            .orElse(null);
+
+	    if (token == null) {
+	        return null;
+	    }
+
+	    return new FbTokenResponseDto(
+	            token.getAccessToken(),
+	            token.getExpiresIn()
+	    );
 	}
 
 }
