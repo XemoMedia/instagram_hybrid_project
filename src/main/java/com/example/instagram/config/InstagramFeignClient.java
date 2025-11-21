@@ -13,10 +13,10 @@ public interface InstagramFeignClient {
 	String fetchMedia(@PathVariable("mediaId") String mediaId, @RequestParam("access_token") String accessToken,
 			@RequestParam("fields") String fields);
 	
-	 @GetMapping(value = "/{igUserId}/media", produces = MediaType.APPLICATION_JSON_VALUE)
-	    String fetchMediaList(
-	            @PathVariable("igUserId") String igUserId,
-	            @RequestParam("fields") String fields,
-	            @RequestParam("access_token") String accessToken
-	    );
+//	 @GetMapping(value = "/{igAccountId}/media", produces = MediaType.APPLICATION_JSON_VALUE)
+//	    String fetchMediaList(
+//	            @PathVariable("igAccountId") String igAccountId,
+//	            @RequestParam("fields") String fields,
+//	            @RequestParam("access_token") String accessToken
+//	    );
 }

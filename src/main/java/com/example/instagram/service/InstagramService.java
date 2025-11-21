@@ -64,11 +64,11 @@ public class InstagramService {
 		return dto;
 	}
 
-	public InstagramMediaListResponseDto fetchInstagramMediaList(String igUserId, String accessToken) throws Exception {
-		String fields = "id,caption,timestamp";
-		String json = feignClient.fetchMediaList(igUserId, fields, accessToken);
-		return mapper.readValue(json, InstagramMediaListResponseDto.class);
-	}
+//	public InstagramMediaListResponseDto fetchInstagramMediaList(String igUserId, String accessToken) throws Exception {
+//		String fields = "id,caption,timestamp";
+//		String json = feignClient.fetchMediaList(igAccountId, fields, accessToken);
+//		return mapper.readValue(json, InstagramMediaListResponseDto.class);
+//	}
 
 	private void saveInstagramMedia(InstagramResponseDto dto) {
 
@@ -130,7 +130,7 @@ public class InstagramService {
 	public JsonNode fetchAndSaveRawResponse() throws Exception {
 
 		// 1. Get RAW JSON from Instagram
-		String json = feignClient.fetchMedia(igAccountId, accessToken, FIELDS);
+		String json = feignClient.fetchMedia(igUserId, accessToken, FIELDS);
 
 		// 2. Parse JSON to extract ID
 		JsonNode node = mapper.readTree(json);
