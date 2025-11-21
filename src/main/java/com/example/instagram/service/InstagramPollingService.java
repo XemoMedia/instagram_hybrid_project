@@ -28,37 +28,57 @@ public class InstagramPollingService {
         this.commentService = commentService;
         // Spring 3.2 → NO UriBuilderFactory, NO encodingMode
     }
+    
+    public InstagramResponseDto fetchInstagramMediaWithComments() throws Exception {
+
+//        String fields =
+//                "id,media_type,media_url,thumbnail_url,caption,permalink,timestamp,username,like_count," +
+//                "comments{id,text,timestamp,from{id,username},replies{id,text,timestamp,from{id,username}}}";
+    	
+    	String fields =
+   			 URLEncoder.encode( "id,media_type,media_url,thumbnail_url,caption,permalink,timestamp,username,like_count," +
+                "comments{id,text,timestamp,from{id,username},replies{id,text,timestamp,from{id,username}}}", "UTF-8");
+
+    	String url = "https://graph.facebook.com/v19.0/" + igUserId
+                + "?access_token=" + accessToken
+                + "&fields=" + fields;
+        return rest.getForObject(new URI(url), InstagramResponseDto.class);
+    }
+
 
     // -------------------------------------------------------------------------
     // FETCH LATEST COMMENTS (Spring 3.2 Safe)
     // -------------------------------------------------------------------------
-    public InstagramResponseDto fetchInstagramComments() throws Exception {
-    	/*@desc : comments_count includes
-				all top-level comments
-				all replies
-    	 * https://graph.facebook.com/v19.0/18079423766135553?access_token=EAAcRzrg2HDcBPZCWiPjZB7ZCaIJqrojybxqlZCtO6QOMND00xl64jDTW2JOHh8gCaI6waYI78IZAOZBRK1wMigYr8luie0mHnJP9cZABLIN085pxXTjqOUZADpaQL5ZAmyRw6ZAj4cFS7q4fZCfMIfvJQbqkncSrUJC4PObHdsGiEF4Yct8TYkLKmbsnTLZCEBRx&fields=comments_count
-    	 */
-        String fields = URLEncoder.encode("id,media_type,media_url,thumbnail_url,caption,permalink,timestamp,username,like_count,comments{id,text,timestamp,from{id,username},replies{id,text,timestamp,from{id,username}}}", "UTF-8");
-
-        String url =
-                "https://graph.facebook.com/v19.0/" + igUserId +
-                "/comments?access_token=" + accessToken +
-                "&fields=" + fields;
-
-        return rest.getForObject(new URI(url), InstagramResponseDto.class);
-    }
+//    public InstagramResponseDto fetchInstagramComments() throws Exception {
+//    	/*@desc : comments_count includes
+//				all top-level comments
+//				all replies
+//    	 * https://graph.facebook.com/v19.0/18079423766135553?access_token=EAAcRzrg2HDcBPZCWiPjZB7ZCaIJqrojybxqlZCtO6QOMND00xl64jDTW2JOHh8gCaI6waYI78IZAOZBRK1wMigYr8luie0mHnJP9cZABLIN085pxXTjqOUZADpaQL5ZAmyRw6ZAj4cFS7q4fZCfMIfvJQbqkncSrUJC4PObHdsGiEF4Yct8TYkLKmbsnTLZCEBRx&fields=comments_count
+//    	 */
+//    	String fields = URLEncoder.encode("id,text,timestamp,from{id}", "UTF-8");
+//    	 
+//        String url =
+//                "https://graph.facebook.com/v19.0/" + igUserId +
+//                "/comments?access_token=" + accessToken +
+//                "&fields=" + fields;
+//
+//        return rest.getForObject(new URI(url), InstagramResponseDto.class);
+//    }
 
     // -------------------------------------------------------------------------
     // FETCH ALL MEDIA AND COMMENTS
     // -------------------------------------------------------------------------
     public void fetchAllMediaAndComments() throws Exception {
 
-        String fields = URLEncoder.encode("id,text,timestamp,from{id}", "UTF-8");
+        //String fields = URLEncoder.encode("id,text,timestamp,from{id}", "UTF-8");
+    	
+    	 String fields =
+    			 URLEncoder.encode( "id,media_type,media_url,thumbnail_url,caption,permalink,timestamp,username,like_count," +
+                 "comments{id,text,timestamp,from{id,username},replies{id,text,timestamp,from{id,username}}}", "UTF-8");
 
-        String url =
-                "https://graph.facebook.com/v19.0/" + igUserId +
-                "/comments?access_token=" + accessToken +
-                "&fields=" + fields;
+    	 String url = "https://graph.facebook.com/v19.0/" + igUserId
+    	            + "?access_token=" + accessToken
+    	            + "&fields=" + fields;
 
         String mediaResp = rest.getForObject(new URI(url), String.class);
         JsonNode mediaJson = mapper.readTree(mediaResp);

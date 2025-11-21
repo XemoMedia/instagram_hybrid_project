@@ -14,7 +14,7 @@ public class PollingScheduler {
     }
 
     // Run every 10 minutes (configurable)
-    @Scheduled(fixedDelayString = "${polling.delay.ms}")
+   // @Scheduled(fixedDelayString = "${polling.delay.ms}")
     public void runPolling() {
         try {
             pollingService.fetchAllMediaAndComments();
