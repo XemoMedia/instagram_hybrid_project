@@ -27,6 +27,21 @@ public class FacebookPageController {
 	public JsonNode getPagesWithInstagram() throws Exception {
 		return fbService.fetchPagesWithInstagram();
 	}
+	
+	 @GetMapping("/oauth/login")
+	    public ResponseEntity<Map<String, String>> loginUrl() {
+	        return ResponseEntity.ok(Map.of("login_url", fbService.generateLoginUrl()));
+	    }
+
+	    @GetMapping("/oauth/exchange")
+	    public ResponseEntity<?> exchange(@RequestParam(required = true) String code) {
+	        try {
+	            Map<String,Object> token = fbService.exchangeCodeForLongLivedToken(code);
+	            return ResponseEntity.ok(token);
+	        } catch (Exception e) {
+	            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+	        }
+	    }
 
 	@GetMapping("/instagram-account")
 	public ResponseEntity<?> getInstagramBusinessAccountId(@RequestParam("accessToken") String accessToken,
