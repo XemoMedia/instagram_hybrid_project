@@ -1,24 +1,24 @@
 package com.example.instagram.scheduler;
 
-import com.example.instagram.service.InstagramPollingService;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import com.example.instagram.service.InstagramService;
 
 @Component
 public class PollingScheduler {
 
-    private final InstagramPollingService pollingService;
+    @Autowired
+    private InstagramService instagramService;
 
-    public PollingScheduler(InstagramPollingService pollingService) {
-        this.pollingService = pollingService;
-    }
-
-    // Run every 10 minutes (configurable)
-    @Scheduled(fixedDelayString = "${polling.delay.ms}")
-    public void runPolling() {
+    // Schedule to run every 60 minutes (3600000 milliseconds)
+    @Scheduled(fixedRate = 3600000)
+    public void pollInstagramMediaComments() {
         try {
-            pollingService.fetchAllMediaAndComments();
+            instagramService.fetchAndSaveCommentsForAllMediaItems();
+            System.out.println("Successfully fetched and saved Instagram media comments.");
         } catch (Exception e) {
+            System.err.println("Error fetching and saving Instagram media comments: " + e.getMessage());
             e.printStackTrace();
         }
     }

@@ -1,54 +1,53 @@
 package com.example.instagram.service;
 
-import com.example.instagram.entity.InstaComment;
-import com.example.instagram.entity.InstagramResponseDto;
-import com.example.instagram.repository.InstaCommentRepository;
+import com.example.instagram.dto.InstagramCommentDTO;
+import com.example.instagram.model.InstagramComment;
+import com.example.instagram.repository.InstagramCommentRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class InstagramCommentService {
 
-    private final InstaCommentRepository repo;
+    @Autowired
+    private InstagramCommentRepository instagramCommentRepository;
 
-    public InstagramCommentService(InstaCommentRepository repo) {
-        this.repo = repo;
+    public List<InstagramCommentDTO> getCommentsByFromId(String fromId) {
+        return instagramCommentRepository.findByFromId(fromId).stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
     }
 
-    @Transactional
-    public void saveCommentsFromInstagramResponse(InstagramResponseDto responseDto) {
-        if (responseDto == null || responseDto.getData() == null) {
-            return;
-        }
-        responseDto.getData().forEach(dataItem -> {
-            String commentId = dataItem.getId();
-            String text = dataItem.getText();
-            String timestamp = dataItem.getTimestamp();
-            String userId = dataItem.getFrom() != null ? dataItem.getFrom().getId() : null;
-            String mediaId = "NOT_AVAILABLE"; // Media ID is not directly in the provided response structure
-
-            saveComment(commentId, mediaId, text, userId, timestamp);
-        });
+    public List<InstagramCommentDTO> getCommentsByFromUsername(String fromUsername) {
+        return instagramCommentRepository.findByFromUsername(fromUsername).stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+    
+    public List<InstagramCommentDTO> findAll() {
+        return instagramCommentRepository.findAll().stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
     }
 
-    @Transactional
-    public void saveComment(String commentId, String mediaId, String text,
-                            String userId, String timestamp) {
+    public List<InstagramCommentDTO> getCommentsByMediaId(String mediaId) {
+        return instagramCommentRepository.findByMedia_Id(mediaId).stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
 
-        if (commentId == null || commentId.isBlank()) {
-            return;
-        }
-
-        if (repo.existsById(commentId)) return;
-
-        InstaComment c = new InstaComment();
-        c.setId(commentId);
-        c.setMediaId(mediaId);
-        c.setText(text);
-        c.setUserId(userId);
-       // c.setUsername(username);
-        c.setTimestamp(timestamp);
-
-        repo.save(c);
+    private InstagramCommentDTO convertToDto(InstagramComment comment) {
+        return new InstagramCommentDTO(
+                comment.getId(),
+                comment.getText(),
+                comment.getTimestamp(),
+                comment.getFromId(),
+                comment.getFromUsername(),
+                comment.getMedia() != null ? comment.getMedia().getId() : null
+                );
+        
     }
 }
