@@ -1,5 +1,7 @@
 package com.example.instagram.controller;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -8,10 +10,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.instagram.dto.InstagramMediaListResponseDto;
 import com.example.instagram.dto.InstagramResponseDto;
 import com.example.instagram.service.InstagramService;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.example.instagram.dto.InstagramMediaListResponseDto;
 
 @RestController
 @RequestMapping("/api/instagram")
@@ -26,7 +28,7 @@ public class InstagramController {
 	@GetMapping("/fetch-by-post-id")
 	public ResponseEntity<?> fetch() {
 		try {
-			InstagramResponseDto response = instaService.fetchInstagramMedia();
+			List<InstagramResponseDto> response = instaService.fetchInstagramMedia();
 
 			// If response is null or empty treat as server down
 			if (response == null) {
