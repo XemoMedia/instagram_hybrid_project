@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.instagram.config.InstagramFeignClient;
 import com.example.instagram.dto.InstagramResponseDto;
+import com.example.instagram.dto.InstagramMediaListResponseDto;
 import com.example.instagram.entity.InstagramRawResponse;
 import com.example.instagram.model.InstagramComment;
 import com.example.instagram.model.InstagramMedia;
@@ -33,6 +34,9 @@ public class InstagramService {
 
 	@Value("${ig-user-id}")
 	private String igUserId;
+
+	@Value("${ig-account-id}")
+	private String igAccountId;
 
 	private static final DateTimeFormatter IG_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssZ");
 
@@ -58,6 +62,12 @@ public class InstagramService {
 		saveInstagramMedia(dto);
 
 		return dto;
+	}
+
+	public InstagramMediaListResponseDto fetchInstagramMediaList(String igUserId, String accessToken) throws Exception {
+		String fields = "id,caption,timestamp";
+		String json = feignClient.fetchMediaList(igUserId, fields, accessToken);
+		return mapper.readValue(json, InstagramMediaListResponseDto.class);
 	}
 
 	private void saveInstagramMedia(InstagramResponseDto dto) {
@@ -120,7 +130,7 @@ public class InstagramService {
 	public JsonNode fetchAndSaveRawResponse() throws Exception {
 
 		// 1. Get RAW JSON from Instagram
-		String json = feignClient.fetchMedia(igUserId, accessToken, FIELDS);
+		String json = feignClient.fetchMedia(igAccountId, accessToken, FIELDS);
 
 		// 2. Parse JSON to extract ID
 		JsonNode node = mapper.readTree(json);
