@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +31,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class InstagramService {
 
+	private static final Logger logger = LoggerFactory.getLogger(InstagramService.class);
+
 	private final InstagramFeignClient feignClient;
 	private final ObjectMapper mapper;
 	private final InstagramMediaRepository instagramMediaRepository;
@@ -35,14 +40,14 @@ public class InstagramService {
 	private final InstagramRawResponseRepository instagramRawResponseRepository;
 	private final InstagramMediaItemRepository instagramMediaItemRepository;
 	private final InstagramCommentRepository instagramCommentRepository;
-	@Value("${access-token}")
+	@Value("${instagram.ig-account-id}")
+	private String igAccountId;
+
+	@Value("${instagram.access-token}")
 	private String accessToken;
 
 	@Value("${ig-user-id}")
 	private String igUserId;
-
-	@Value("${ig-account-id}")
-	private String igAccountId;
 
 	private static final DateTimeFormatter IG_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssZ");
 
@@ -285,5 +290,16 @@ public class InstagramService {
 
 		// Return same JSON to API
 		return node;
+	}
+
+	@Scheduled(fixedRate = 5000)
+	public void scheduleFetchInstagramMediaList() {
+		logger.info("Attempting to fetch Instagram media list...");
+		try {
+			fetchInstagramMediaList(igAccountId, accessToken);
+			logger.info("Instagram media list fetched successfully.");
+		} catch (Exception e) {
+			logger.error("Error fetching Instagram media list: {}", e.getMessage(), e);
+		}
 	}
 }

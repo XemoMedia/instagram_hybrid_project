@@ -25,7 +25,7 @@ public class InstagramController {
 		this.instaService = instaService;
 	}
 
-	@GetMapping("/fetch-by-post-id")
+	@GetMapping("/fetch-all-insta-post")
 	public ResponseEntity<?> fetch() {
 		try {
 			List<InstagramResponseDto> response = instaService.fetchInstagramMedia();
