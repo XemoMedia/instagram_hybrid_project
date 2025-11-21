@@ -11,10 +11,13 @@ import org.springframework.stereotype.Service;
 
 import com.example.instagram.config.InstagramFeignClient;
 import com.example.instagram.dto.InstagramResponseDto;
+import com.example.instagram.entity.InstagramRawResponse;
 import com.example.instagram.model.InstagramComment;
 import com.example.instagram.model.InstagramMedia;
 import com.example.instagram.model.InstagramReply;
 import com.example.instagram.repository.InstagramMediaRepository;
+import com.example.instagram.repository.InstagramRawResponseRepository;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
@@ -24,13 +27,13 @@ public class InstagramService {
 	private final ObjectMapper mapper;
 	private final InstagramMediaRepository instagramMediaRepository;
 
+	private final InstagramRawResponseRepository instagramRawResponseRepository;
 	@Value("${access-token}")
 	private String accessToken;
-	
+
 	@Value("${ig-user-id}")
 	private String igUserId;
 
-	
 	private static final DateTimeFormatter IG_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssZ");
 
 	// NO ENCODING!
@@ -38,10 +41,12 @@ public class InstagramService {
 			+ "comments{id,text,timestamp,from{id,username},replies{id,text,timestamp,from{id,username}}}";
 
 	public InstagramService(InstagramFeignClient feignClient, ObjectMapper mapper,
-			InstagramMediaRepository instagramMediaRepository) {
+			InstagramMediaRepository instagramMediaRepository,
+			InstagramRawResponseRepository instagramRawResponseRepository) {
 		this.feignClient = feignClient;
 		this.mapper = mapper;
 		this.instagramMediaRepository = instagramMediaRepository;
+		this.instagramRawResponseRepository = instagramRawResponseRepository;
 	}
 
 	public InstagramResponseDto fetchInstagramMedia() throws Exception {
@@ -112,4 +117,23 @@ public class InstagramService {
 		instagramMediaRepository.save(media);
 	}
 
+	public JsonNode fetchAndSaveRawResponse() throws Exception {
+
+		// 1. Get RAW JSON from Instagram
+		String json = feignClient.fetchMedia(igUserId, accessToken, FIELDS);
+
+		// 2. Parse JSON to extract ID
+		JsonNode node = mapper.readTree(json);
+		String mediaId = node.get("id").asText();
+
+		// 3. Store JSON in DB
+		InstagramRawResponse raw = new InstagramRawResponse();
+		raw.setInstagramId(mediaId);
+		raw.setJsonData(json);
+
+		instagramRawResponseRepository.save(raw);
+
+		// Return same JSON to API
+		return node;
+	}
 }
