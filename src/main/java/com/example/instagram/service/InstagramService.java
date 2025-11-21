@@ -40,10 +40,10 @@ public class InstagramService {
 	private final InstagramRawResponseRepository instagramRawResponseRepository;
 	private final InstagramMediaItemRepository instagramMediaItemRepository;
 	private final InstagramCommentRepository instagramCommentRepository;
-	@Value("${instagram.ig-account-id}")
+	@Value("${ig-account-id}")
 	private String igAccountId;
 
-	@Value("${instagram.access-token}")
+	@Value("${access-token}")
 	private String accessToken;
 
 	@Value("${ig-user-id}")
@@ -292,7 +292,7 @@ public class InstagramService {
 		return node;
 	}
 
-	@Scheduled(fixedRate = 5000)
+	//@Scheduled(fixedRate = 5000)
 	public void scheduleFetchInstagramMediaList() {
 		logger.info("Attempting to fetch Instagram media list...");
 		try {

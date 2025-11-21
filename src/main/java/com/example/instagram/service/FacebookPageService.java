@@ -34,7 +34,7 @@ public class FacebookPageService {
     @Value("${app.instagram.app-secret}")
     private String appSecret;
 
-    @Value("${facebook.redirect-uri:http://localhost:8080/api/facebook/oauth/exchange}")
+    @Value("${facebook.redirect-uri:http://localhost:8080/fb/oauth/exchange}")
     private String redirectUri;
     
     @Value("${facebook.api-version:v19.0}")

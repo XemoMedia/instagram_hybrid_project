@@ -12,7 +12,7 @@ public class PollingScheduler {
     private InstagramService instagramService;
 
     // Schedule to run every 60 minutes (3600000 milliseconds)
-    @Scheduled(fixedRate = 3600000)
+    //@Scheduled(fixedRate = 3600000)
     public void pollInstagramMediaComments() {
         try {
             instagramService.fetchAndSaveCommentsForAllMediaItems();
