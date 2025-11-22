@@ -10,7 +10,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.xmedia.social.instagram.dto.InstagramCommentDto;
+import com.xmedia.social.instagram.dto.CommentSentimentDto;
 import com.xmedia.social.instagram.service.InstagramCommentService;
+import com.xmedia.social.sentimentanalysis.service.SentimentService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -27,6 +29,9 @@ public class InstagramCommentController {
 
 	@Autowired
 	private InstagramCommentService instagramCommentService;
+
+	@Autowired
+	private SentimentService sentimentService;
 
 	@Operation(
 			summary = "Get comments by user ID",
@@ -66,6 +71,43 @@ public class InstagramCommentController {
 			@RequestParam("username") String username) {
 		List<InstagramCommentDto> comments = instagramCommentService.getCommentsByFromUsername(username);
 		return ResponseEntity.ok(comments);
+	}
+
+	@Operation(
+			summary = "Get comments with sentiment analysis by username",
+			description = "Retrieves all Instagram comments made by a specific username and performs sentiment analysis " +
+					"using NLP (Stanford CoreNLP) on each comment text. Returns text, sentiment label, and polarity score."
+	)
+	@ApiResponses(value = {
+			@ApiResponse(
+					responseCode = "200",
+					description = "Comments with sentiment analysis retrieved successfully",
+					content = @Content(schema = @Schema(implementation = CommentSentimentDto.class))
+			)
+	})
+	@GetMapping("/by-username/sentiment")
+	public ResponseEntity<List<CommentSentimentDto>> getCommentsWithSentimentByUsername(
+			@Parameter(description = "Instagram username who made the comments", required = true, example = "johndoe")
+			@RequestParam("username") String username) {
+		// Fetch comments from database
+		List<InstagramCommentDto> comments = instagramCommentService.getCommentsByFromUsername(username);
+		
+		// Analyze sentiment for each comment text
+		List<CommentSentimentDto> results = comments.stream()
+				.map(comment -> {
+					// Analyze text using NLP sentiment service
+					SentimentService.SentimentAnalysisResult analysis = 
+							sentimentService.analyzeText(comment.getText());
+					
+					return new CommentSentimentDto(
+							comment.getText(),
+							analysis.getLabel(),
+							analysis.getPolarity()
+					);
+				})
+				.collect(java.util.stream.Collectors.toList());
+		
+		return ResponseEntity.ok(results);
 	}
 
 	@Operation(
