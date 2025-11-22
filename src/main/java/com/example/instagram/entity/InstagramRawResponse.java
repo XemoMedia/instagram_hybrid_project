@@ -17,9 +17,11 @@ public class InstagramRawResponse {
     @Column(name = "instagram_id")
     private String instagramId;
 
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "json_data", columnDefinition = "jsonb")
-    private String jsonData;
+	
+	  @JdbcTypeCode(SqlTypes.JSON)
+	  @Column(name = "json_data", columnDefinition = "jsonb")
+	  private String jsonData;
+	 
 
 	public Long getId() {
 		return id;
@@ -37,13 +39,11 @@ public class InstagramRawResponse {
 		this.instagramId = instagramId;
 	}
 
-	public String getJsonData() {
-		return jsonData;
-	}
-
-	public void setJsonData(String jsonData) {
-		this.jsonData = jsonData;
-	}
+	
+	 public String getJsonData() { return jsonData; }
+	  
+	  public void setJsonData(String jsonData) { this.jsonData = jsonData; }
+	 
     
 }
 
