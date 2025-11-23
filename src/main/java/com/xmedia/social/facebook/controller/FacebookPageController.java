@@ -71,8 +71,8 @@ public class FacebookPageController {
 			)
 	})
 	@GetMapping("/oauth/login")
-	public ResponseEntity<Map<String, String>> loginUrl() {
-		return ResponseEntity.ok(Map.of("login_url", fbService.generateLoginUrl()));
+	public ResponseEntity<Map<String, String>> loginUrl(@RequestParam String email) {
+		return ResponseEntity.ok(Map.of("login_url", fbService.generateLoginUrl(email)));
 	}
 
 	@Operation(

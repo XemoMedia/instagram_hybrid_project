@@ -10,17 +10,23 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.xmedia.social.facebook.dto.FbTokenResponseDto;
 import com.xmedia.social.facebook.entity.FacebookToken;
 import com.xmedia.social.facebook.repository.FacebookTokenRepository;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.xmedia.social.mail.entity.EmailConfig;
+import com.xmedia.social.mail.entity.EmailTemplate;
+import com.xmedia.social.mail.repository.EmailConfigRepository;
+import com.xmedia.social.mail.service.EmailTemplateService;
+import com.xmedia.social.utility.EmailUtility;
 
 @Service
 public class FacebookPageService {
@@ -33,6 +39,15 @@ public class FacebookPageService {
 
 	@Autowired
 	private FacebookTokenRepository tokenRepo;
+	
+	@Autowired
+	private EmailTemplateService emailTemplateService;
+	
+	@Autowired
+	private EmailConfigRepository emailConfigRepository;
+	
+	@Autowired
+	private EmailUtility emailUtility;
 
 	@Value("${app_id}")
 	private String appId;
@@ -48,9 +63,11 @@ public class FacebookPageService {
 
 	@Value("${token.file:src/main/resources/token.json}")
 	private String tokenFile;
-
+	
 	private final RestTemplate rest = new RestTemplate();
 	private final ObjectMapper mapper = new ObjectMapper();
+	
+	
 
 	/**
 	 * Step 1 — Exchange short-lived token → long-lived token
@@ -83,15 +100,27 @@ public class FacebookPageService {
 		return mapper.readTree(resp);
 	}
 
-	public String generateLoginUrl() {
+	public String generateLoginUrl( String emailTo) {
 		try {
 			String encoded = URLEncoder.encode(redirectUri, StandardCharsets.UTF_8);
 			String scope = URLEncoder.encode(
 					"instagram_basic,instagram_manage_comments,pages_read_engagement,pages_manage_posts,pages_read_user_content,pages_show_list,public_profile",
 					StandardCharsets.UTF_8);
-			return String.format(
+			String returnUrl =  String.format(
 					"https://www.facebook.com/%s/dialog/oauth?client_id=%s&redirect_uri=%s&scope=%s&response_type=code",
 					apiVersion, appId, encoded, scope);
+			
+			//String body = template.getBody().replace("{{userName}}", "Hi").replace("{{link}}", returnUrl);
+			EmailTemplate emailTemplate = emailTemplateService.getTemplateByName("TOKEN_GEN_MAIL");
+			String body = emailTemplate.getBody().replace("{{userName}}", "Hi").replace("{{link}}", returnUrl);
+			emailTemplate.setBody(body);
+			Optional<EmailConfig> emailConfig = emailConfigRepository.findByHost("smtp.gmail.com");
+			if(emailConfig.isPresent()) {
+				emailConfig.get().setTo(emailTo);
+				emailUtility.sendEmail(emailTemplate,emailConfig.get());
+			}
+			
+			return returnUrl;
 		} catch (Exception e) {
 			return "ERROR_GENERATING_URL:" + e.getMessage();
 		}
