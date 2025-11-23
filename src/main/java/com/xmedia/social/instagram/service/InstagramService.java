@@ -17,28 +17,33 @@ import com.xmedia.social.instagram.dto.InstagramMediaListResponseDto;
 import com.xmedia.social.instagram.dto.InstagramResponseDto;
 import com.xmedia.social.instagram.entity.InstagramMediaItem;
 import com.xmedia.social.instagram.entity.InstagramRawResponse;
-import com.xmedia.social.instagram.entity.InstagramComment;
-import com.xmedia.social.instagram.entity.InstagramMedia;
-import com.xmedia.social.instagram.entity.InstagramReply;
-import com.xmedia.social.instagram.repository.InstagramCommentRepository;
+import com.xmedia.social.instagram.entity.Comment;
+import com.xmedia.social.instagram.entity.Post;
+import com.xmedia.social.instagram.entity.Reply;
+import com.xmedia.social.instagram.repository.CommentRepository;
+
 import com.xmedia.social.instagram.repository.InstagramMediaItemRepository;
-import com.xmedia.social.instagram.repository.InstagramMediaRepository;
+import com.xmedia.social.instagram.repository.PostRepository;
+
+import lombok.RequiredArgsConstructor;
+
 import com.xmedia.social.instagram.repository.InstagramRawResponseRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
+@RequiredArgsConstructor
 public class InstagramService {
 
 	private static final Logger logger = LoggerFactory.getLogger(InstagramService.class);
 
 	private final InstagramFeignClient feignClient;
 	private final ObjectMapper mapper;
-	private final InstagramMediaRepository instagramMediaRepository;
+	private final PostRepository postRepository;
 
 	private final InstagramRawResponseRepository instagramRawResponseRepository;
 	private final InstagramMediaItemRepository instagramMediaItemRepository;
-	private final InstagramCommentRepository instagramCommentRepository;
+	private final CommentRepository commentRepository;
 	@Value("${ig-account-id}")
 	private String igAccountId;
 
@@ -54,17 +59,7 @@ public class InstagramService {
 	private static final String FIELDS = "id,media_type,media_url,thumbnail_url,caption,permalink,timestamp,username,like_count,"
 			+ "comments{id,text,timestamp,from{id,username},replies{id,text,timestamp,from{id,username}}}";
 
-	public InstagramService(InstagramFeignClient feignClient, ObjectMapper mapper,
-			InstagramMediaRepository instagramMediaRepository,
-			InstagramRawResponseRepository instagramRawResponseRepository, InstagramMediaItemRepository instagramMediaItemRepository,
-			InstagramCommentRepository instagramCommentRepository) {
-		this.feignClient = feignClient;
-		this.mapper = mapper;
-		this.instagramMediaRepository = instagramMediaRepository;
-		this.instagramRawResponseRepository = instagramRawResponseRepository;
-		this.instagramMediaItemRepository = instagramMediaItemRepository;
-		this.instagramCommentRepository = instagramCommentRepository;
-	}
+
 	
 	public List<InstagramResponseDto> fetchInstagramMedia() throws Exception {
 
@@ -162,7 +157,7 @@ public class InstagramService {
 			JsonNode rootNode = mapper.readTree(json);
 
 			// Extract media details (if needed)
-			InstagramMedia media = instagramMediaRepository.findById(mediaId).orElse(new InstagramMedia());
+			Post media = postRepository.findById(mediaId).orElse(new Post());
 			media.setId(rootNode.path("id").asText());
 			media.setMediaType(rootNode.path("media_type").asText());
 			media.setMediaUrl(rootNode.path("media_url").asText());
@@ -173,36 +168,36 @@ public class InstagramService {
 			}
 			media.setUsername(rootNode.path("username").asText());
 			media.setLikeCount(rootNode.path("like_count").asInt());
-			instagramMediaRepository.save(media);
+			postRepository.save(media);
 
 			JsonNode commentsNode = rootNode.path("comments").path("data");
 			if (commentsNode.isArray()) {
-				List<InstagramComment> instagramComments = new ArrayList<>();
+				List<Comment> instagramComments = new ArrayList<>();
 				for (JsonNode commentNode : commentsNode) {
-					InstagramComment comment = new InstagramComment();
+					Comment comment = new Comment();
 					comment.setId(commentNode.path("id").asText());
 					comment.setText(commentNode.path("text").asText());
 					String commentTimestampStr = commentNode.path("timestamp").asText();
 					if (!commentTimestampStr.isEmpty()) {
 						comment.setTimestamp(LocalDateTime.parse(commentTimestampStr, IG_FORMATTER));
 					}
-					comment.setFromId(commentNode.path("from").path("id").asText());
-					comment.setFromUsername(commentNode.path("from").path("username").asText());
+					comment.setAccountId(commentNode.path("from").path("id").asText());
+					comment.setUsername(commentNode.path("from").path("username").asText());
 					comment.setMedia(media);
 
 					JsonNode repliesNode = commentNode.path("replies").path("data");
 					if (repliesNode.isArray()) {
-						List<InstagramReply> replies = new ArrayList<>();
+						List<Reply> replies = new ArrayList<>();
 						for (JsonNode replyNode : repliesNode) {
-							InstagramReply reply = new InstagramReply();
+							Reply reply = new Reply();
 							reply.setId(replyNode.path("id").asText());
 							reply.setText(replyNode.path("text").asText());
 							String replyTimestampStr = replyNode.path("timestamp").asText();
 							if (!replyTimestampStr.isEmpty()) {
 								reply.setTimestamp(LocalDateTime.parse(replyTimestampStr, IG_FORMATTER));
 							}
-							reply.setFromId(replyNode.path("from").path("id").asText());
-							reply.setFromUsername(replyNode.path("from").path("username").asText());
+							reply.setAccountId(replyNode.path("from").path("id").asText());
+							reply.setUsername(replyNode.path("from").path("username").asText());
 							reply.setComment(comment);
 							replies.add(reply);
 						}
@@ -210,14 +205,14 @@ public class InstagramService {
 					}
 					instagramComments.add(comment);
 				}
-				instagramCommentRepository.saveAll(instagramComments);
+				commentRepository.saveAll(instagramComments);
 			}
 		}
 	}
 
 	private void saveInstagramMedia(InstagramResponseDto dto) {
 
-		InstagramMedia media = new InstagramMedia();
+		Post media = new Post();
 
 		media.setId(dto.getId());
 		media.setMediaType(dto.getMediaType());
@@ -228,30 +223,30 @@ public class InstagramService {
 		media.setLikeCount(dto.getLikeCount());
 
 		if (dto.getComments() != null && dto.getComments().getData() != null) {
-			List<InstagramComment> comments = dto.getComments().getData().stream().map(c -> {
-				InstagramComment comment = new InstagramComment();
+			List<Comment> comments = dto.getComments().getData().stream().map(c -> {
+				Comment comment = new Comment();
 
 				comment.setId(c.getId());
 				comment.setText(c.getText());
 				comment.setTimestamp(LocalDateTime.parse(c.getTimestamp(), IG_FORMATTER));
 
 				if (c.getFrom() != null) {
-					comment.setFromId(c.getFrom().getId());
-					comment.setFromUsername(c.getFrom().getUsername());
+					comment.setAccountId(c.getFrom().getId());
+					comment.setUsername(c.getFrom().getUsername());
 				}
 
 				comment.setMedia(media);
 
 				if (c.getReplies() != null && c.getReplies().getData() != null) {
-					List<InstagramReply> replies = c.getReplies().getData().stream().map(r -> {
-						InstagramReply reply = new InstagramReply();
+					List<Reply> replies = c.getReplies().getData().stream().map(r -> {
+						Reply reply = new Reply();
 						reply.setId(r.getId());
 						reply.setText(r.getText());
 						reply.setTimestamp(LocalDateTime.parse(r.getTimestamp(), IG_FORMATTER));
 
 						if (r.getFrom() != null) {
-							reply.setFromId(r.getFrom().getId());
-							reply.setFromUsername(r.getFrom().getUsername());
+							reply.setAccountId(r.getFrom().getId());
+							reply.setUsername(r.getFrom().getUsername());
 						}
 
 						reply.setComment(comment);
@@ -269,7 +264,7 @@ public class InstagramService {
 			media.setComments(comments);
 		}
 
-		instagramMediaRepository.save(media);
+		postRepository.save(media);
 	}
 
 	public JsonNode fetchAndSaveRawResponse() throws Exception {

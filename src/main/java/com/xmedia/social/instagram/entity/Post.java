@@ -4,9 +4,13 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.xmedia.social.base.enums.SocialMediaType;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -16,8 +20,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @Entity
-@Table(name = "instagram_media")
-public class InstagramMedia {
+@Table(name = "post")
+public class Post {
 
     @Id
     private String id;
@@ -43,5 +47,9 @@ public class InstagramMedia {
     private Integer likeCount;
 
     @OneToMany(mappedBy = "media", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<InstagramComment> comments = new ArrayList<>();
+    private List<Comment> comments = new ArrayList<>();
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "social_media_type")
+    private SocialMediaType socialMediaType;
 }

@@ -2,8 +2,12 @@ package com.xmedia.social.instagram.entity;
 
 import java.time.LocalDateTime;
 
+import com.xmedia.social.base.enums.SocialMediaType;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -14,8 +18,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @Entity
-@Table(name = "instagram_replies")
-public class InstagramReply {
+@Table(name = "replies")
+public class Reply {
 
     @Id
     private String id;
@@ -25,12 +29,16 @@ public class InstagramReply {
 
     private LocalDateTime timestamp;
 
-    private String fromId;
+    private String accountId;
 
-    private String fromUsername;
+    private String username;
 
     @ManyToOne
     @JoinColumn(name = "comment_id")
-    private InstagramComment comment;
+    private Comment comment;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "social_media_type")
+    private SocialMediaType socialMediaType;
 }
 

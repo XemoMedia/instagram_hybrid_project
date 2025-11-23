@@ -4,9 +4,13 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.xmedia.social.base.enums.SocialMediaType;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -18,8 +22,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @Entity
-@Table(name = "instagram_comments")
-public class InstagramComment {
+@Table(name = "comments")
+public class Comment {
 
     @Id
     private String id;
@@ -29,14 +33,18 @@ public class InstagramComment {
 
     private LocalDateTime timestamp;
 
-    private String fromId;
+    private String accountId;
 
-    private String fromUsername;
+    private String username;
 
     @ManyToOne
-    @JoinColumn(name = "media_id")
-    private InstagramMedia media;
+    @JoinColumn(name = "post_id")
+    private Post media;
 
     @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<InstagramReply> replies = new ArrayList<>();
+    private List<Reply> replies = new ArrayList<>();
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "social_media_type")
+    private SocialMediaType socialMediaType;
 }

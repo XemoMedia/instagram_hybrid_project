@@ -1,8 +1,8 @@
 package com.xmedia.social.instagram.service;
 
 import com.xmedia.social.instagram.dto.InstagramCommentDto;
-import com.xmedia.social.instagram.entity.InstagramComment;
-import com.xmedia.social.instagram.repository.InstagramCommentRepository;
+import com.xmedia.social.instagram.entity.Comment;
+import com.xmedia.social.instagram.repository.CommentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,39 +13,39 @@ import java.util.stream.Collectors;
 public class InstagramCommentService {
 
     @Autowired
-    private InstagramCommentRepository instagramCommentRepository;
+    private CommentRepository commentRepository;
 
     public List<InstagramCommentDto> getCommentsByFromId(String fromId) {
-        return instagramCommentRepository.findByFromId(fromId).stream()
+        return commentRepository.findByAccountId(fromId).stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
 
     public List<InstagramCommentDto> getCommentsByFromUsername(String fromUsername) {
-        return instagramCommentRepository.findByFromUsername(fromUsername).stream()
+            return commentRepository.findByUsername(fromUsername).stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
     
     public List<InstagramCommentDto> findAll() {
-        return instagramCommentRepository.findAll().stream()
+        return commentRepository.findAll().stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
 
     public List<InstagramCommentDto> getCommentsByMediaId(String mediaId) {
-        return instagramCommentRepository.findByMedia_Id(mediaId).stream()
+        return commentRepository.findByMedia_Id(mediaId).stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
 
-    private InstagramCommentDto convertToDto(InstagramComment comment) {
+    private InstagramCommentDto convertToDto(Comment comment) {
         return new InstagramCommentDto(
                 comment.getId(),
                 comment.getText(),
                 comment.getTimestamp(),
-                comment.getFromId(),
-                comment.getFromUsername(),
+                comment.getAccountId(),
+                comment.getUsername(),
                 comment.getMedia() != null ? comment.getMedia().getId() : null
                 );
         
