@@ -28,6 +28,10 @@ public class LanguageUtil {
 			// fastText predict returns a list of predictions, we take the first one
 			// The label format is __label__<lang_code>
 			String predictedLabel = fastText.predict(text);
+			if (predictedLabel == null) {
+				logger.warn("FastText predicted label is null for text: {}", text);
+				return "Unknown";
+			}
 			String iso = predictedLabel.replace("__label__", "");
 			logger.debug("Detected ISO: {} for text: {}", iso, text);
 
