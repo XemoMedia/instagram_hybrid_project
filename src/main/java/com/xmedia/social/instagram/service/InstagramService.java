@@ -6,30 +6,29 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.xmedia.social.base.config.InstagramFeignClient;
 import com.xmedia.social.instagram.dto.InstagramMediaListResponseDto;
 import com.xmedia.social.instagram.dto.InstagramResponseDto;
+import com.xmedia.social.instagram.entity.Comment;
 import com.xmedia.social.instagram.entity.InstagramMediaItem;
 import com.xmedia.social.instagram.entity.InstagramRawResponse;
-import com.xmedia.social.instagram.entity.Comment;
 import com.xmedia.social.instagram.entity.Post;
 import com.xmedia.social.instagram.entity.Reply;
 import com.xmedia.social.instagram.repository.CommentRepository;
-
 import com.xmedia.social.instagram.repository.InstagramMediaItemRepository;
+import com.xmedia.social.instagram.repository.InstagramRawResponseRepository;
 import com.xmedia.social.instagram.repository.PostRepository;
+import com.xmedia.social.lang.util.LanguageUtil;
 
 import lombok.RequiredArgsConstructor;
-
-import com.xmedia.social.instagram.repository.InstagramRawResponseRepository;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 @RequiredArgsConstructor
@@ -44,6 +43,7 @@ public class InstagramService {
 	private final InstagramRawResponseRepository instagramRawResponseRepository;
 	private final InstagramMediaItemRepository instagramMediaItemRepository;
 	private final CommentRepository commentRepository;
+	private final LanguageUtil languageUtil;
 	@Value("${ig-account-id}")
 	private String igAccountId;
 
@@ -59,90 +59,64 @@ public class InstagramService {
 	private static final String FIELDS = "id,media_type,media_url,thumbnail_url,caption,permalink,timestamp,username,like_count,"
 			+ "comments{id,text,timestamp,from{id,username},replies{id,text,timestamp,from{id,username}}}";
 
-
-	
 	public List<InstagramResponseDto> fetchInstagramMedia() throws Exception {
 
-	    List<InstagramResponseDto> resultList = new ArrayList<>();
+		List<InstagramResponseDto> resultList = new ArrayList<>();
 
-	    List<InstagramMediaItem> mediaItems = instagramMediaItemRepository.findAll();
+		List<InstagramMediaItem> mediaItems = instagramMediaItemRepository.findAll();
 
-	    if (mediaItems.isEmpty()) {
-	        // If table empty  use igUserId and fetch only once
-	    	
-	        String json = feignClient.fetchMedia(igUserId, accessToken, FIELDS);
+		if (mediaItems.isEmpty()) {
+			// If table empty use igUserId and fetch only once
 
-	        InstagramResponseDto dto = mapper.readValue(json, InstagramResponseDto.class);
-	        saveInstagramMedia(dto);
-	        resultList.add(dto);
+			String json = feignClient.fetchMedia(igUserId, accessToken, FIELDS);
 
-	        return resultList;
-	    }
+			InstagramResponseDto dto = mapper.readValue(json, InstagramResponseDto.class);
+			saveInstagramMedia(dto);
+			resultList.add(dto);
 
-	    // Loop through all media items and make API call for each ID
-	    for (InstagramMediaItem item : mediaItems) {
+			return resultList;
+		}
 
-	        String mediaItemId = item.getId();
+		// Loop through all media items and make API call for each ID
+		for (InstagramMediaItem item : mediaItems) {
 
-	        try {
-	            String json = feignClient.fetchMedia(mediaItemId, accessToken, FIELDS);
+			String mediaItemId = item.getId();
 
-	            InstagramResponseDto dto = mapper.readValue(json, InstagramResponseDto.class);
+			try {
+				String json = feignClient.fetchMedia(mediaItemId, accessToken, FIELDS);
 
-	            saveInstagramMedia(dto);  // Save every response in DB
+				InstagramResponseDto dto = mapper.readValue(json, InstagramResponseDto.class);
 
-	            resultList.add(dto);
+				saveInstagramMedia(dto); // Save every response in DB
 
-	        } catch (Exception ex) {
-	            System.out.println("Error fetching media for ID: " + mediaItemId);
-	            ex.printStackTrace();
-	            // Continue for next ID, don't stop the loop
-	        }
-	    }
+				resultList.add(dto);
 
-	    return resultList;
+			} catch (Exception ex) {
+				System.out.println("Error fetching media for ID: " + mediaItemId);
+				ex.printStackTrace();
+				// Continue for next ID, don't stop the loop
+			}
+		}
+
+		return resultList;
 	}
 
-
-//	public InstagramResponseDto fetchInstagramMedia() throws Exception {
-//
-//		String json;
-//		List<InstagramMediaItem> mediaItems = instagramMediaItemRepository.findAll();
-//
-//		if (mediaItems.isEmpty()) {
-//			// Fallback to igUserId from properties if no media items are in the table
-//			json = feignClient.fetchMedia(igUserId, accessToken, FIELDS);
-//		} else {
-//			// Assuming we want to fetch media for the first item found, or you can loop
-//			// If you want to fetch for all, you'd need a different return type or to aggregate
-//			String mediaItemId = mediaItems.get(0).getId();
-//			json = feignClient.fetchMedia(mediaItemId, accessToken, FIELDS);
-//		}
-//
-//		InstagramResponseDto dto = mapper.readValue(json, InstagramResponseDto.class);
-//
-//		saveInstagramMedia(dto);
-//
-//		return dto;
-//	}
-
 	@Transactional
-	public InstagramMediaListResponseDto fetchInstagramMediaList(String igAccountId, String accessToken) throws Exception {
+	public InstagramMediaListResponseDto fetchInstagramMediaList(String igAccountId, String accessToken)
+			throws Exception {
 		String fields = "id,caption,timestamp";
 		String json = feignClient.fetchMediaList(igAccountId, fields, accessToken);
 		InstagramMediaListResponseDto responseDto = mapper.readValue(json, InstagramMediaListResponseDto.class);
 
 		if (responseDto != null && responseDto.getData() != null) {
-			List<InstagramMediaItem> mediaItems = responseDto.getData().stream()
-					.map(dto -> {
-						InstagramMediaItem item = new InstagramMediaItem();
-						item.setId(dto.getId());
-						item.setIgAccountId(igAccountId);
-						item.setTimestamp(LocalDateTime.parse(dto.getTimestamp(), IG_FORMATTER));
-						item.setCaption(dto.getCaption());
-						return item;
-					})
-					.collect(Collectors.toList());
+			List<InstagramMediaItem> mediaItems = responseDto.getData().stream().map(dto -> {
+				InstagramMediaItem item = new InstagramMediaItem();
+				item.setId(dto.getId());
+				item.setIgAccountId(igAccountId);
+				item.setTimestamp(LocalDateTime.parse(dto.getTimestamp(), IG_FORMATTER));
+				item.setCaption(dto.getCaption());
+				return item;
+			}).collect(Collectors.toList());
 			instagramMediaItemRepository.saveAll(mediaItems);
 		}
 		return responseDto;
@@ -228,6 +202,8 @@ public class InstagramService {
 
 				comment.setId(c.getId());
 				comment.setText(c.getText());
+				String iso = languageUtil.detectLanguageIso(c.getText());
+				comment.setLanguageCode(iso);
 				comment.setTimestamp(LocalDateTime.parse(c.getTimestamp(), IG_FORMATTER));
 
 				if (c.getFrom() != null) {
@@ -287,7 +263,7 @@ public class InstagramService {
 		return node;
 	}
 
-	//@Scheduled(fixedRate = 5000)
+	// @Scheduled(fixedRate = 5000)
 	public void scheduleFetchInstagramMediaList() {
 		logger.info("Attempting to fetch Instagram media list...");
 		try {
@@ -298,4 +274,3 @@ public class InstagramService {
 		}
 	}
 }
-

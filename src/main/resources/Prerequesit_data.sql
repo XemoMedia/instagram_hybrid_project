@@ -1,4 +1,6 @@
 
+ALTER TABLE comments
+ADD COLUMN language_code VARCHAR(50);
 
 /*INSERT INTO email_template (template_name, subject, body)
 VALUES (
