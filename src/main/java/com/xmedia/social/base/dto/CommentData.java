@@ -9,5 +9,6 @@ public class CommentData {
     private String timestamp;
     private From from;
     private Replies replies;
+    private String langType;
 }
 

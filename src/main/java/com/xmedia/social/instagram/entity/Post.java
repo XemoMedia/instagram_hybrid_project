@@ -46,6 +46,8 @@ public class Post {
 
     private Integer likeCount;
 
+    private String languageCode;
+
     @OneToMany(mappedBy = "media", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 

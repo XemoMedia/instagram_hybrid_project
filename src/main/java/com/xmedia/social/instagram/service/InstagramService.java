@@ -198,12 +198,15 @@ public class InstagramService {
 
 		if (dto.getComments() != null && dto.getComments().getData() != null) {
 			List<Comment> comments = dto.getComments().getData().stream().map(c -> {
+
+				
 				Comment comment = new Comment();
 
 				comment.setId(c.getId());
 				comment.setText(c.getText());
 				String iso = languageUtil.detectLanguageIso(c.getText());
 				comment.setLanguageCode(iso);
+				c.setLangType(iso);
 				comment.setTimestamp(LocalDateTime.parse(c.getTimestamp(), IG_FORMATTER));
 
 				if (c.getFrom() != null) {
