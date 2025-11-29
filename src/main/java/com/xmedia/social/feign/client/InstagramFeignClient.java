@@ -1,10 +1,10 @@
-package com.xmedia.social.base.config;
+package com.xmedia.social.feign.client;
 
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.http.MediaType;
 
 @FeignClient(name = "instagramClient", url = "https://graph.facebook.com/v19.0")
 public interface InstagramFeignClient {
