@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.xmedia.social.base.entity.BaseEntity;
 import com.xmedia.social.base.enums.SocialMediaType;
 
 import jakarta.persistence.CascadeType;
@@ -14,14 +15,21 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
+@SuperBuilder
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "post")
-public class Post {
+public class Post extends BaseEntity {
 
     @Id
     private String id;
@@ -46,9 +54,8 @@ public class Post {
 
     private Integer likeCount;
 
-    private String languageCode;
-
     @OneToMany(mappedBy = "media", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<Comment> comments = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)

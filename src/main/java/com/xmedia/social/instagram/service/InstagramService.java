@@ -27,6 +27,7 @@ import com.xmedia.social.instagram.repository.InstagramMediaItemRepository;
 import com.xmedia.social.instagram.repository.InstagramRawResponseRepository;
 import com.xmedia.social.instagram.repository.PostRepository;
 import com.xmedia.social.lang.util.LanguageUtil;
+import com.xmedia.social.sentimentanalysis.service.SentimentService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -58,6 +59,8 @@ public class InstagramService {
 	// NO ENCODING!
 	private static final String FIELDS = "id,media_type,media_url,thumbnail_url,caption,permalink,timestamp,username,like_count,"
 			+ "comments{id,text,timestamp,from{id,username},replies{id,text,timestamp,from{id,username}}}";
+
+	private final SentimentService sentimentService;
 
 	public List<InstagramResponseDto> fetchInstagramMedia() throws Exception {
 
@@ -185,67 +188,81 @@ public class InstagramService {
 	}
 
 	private void saveInstagramMedia(InstagramResponseDto dto) {
-
-		Post media = new Post();
-
-		media.setId(dto.getId());
-		media.setMediaType(dto.getMediaType());
-		media.setMediaUrl(dto.getMediaUrl());
-		media.setPermalink(dto.getPermalink());
-		media.setTimestamp(LocalDateTime.parse(dto.getTimestamp(), IG_FORMATTER));
-		media.setUsername(dto.getUsername());
-		media.setLikeCount(dto.getLikeCount());
-
+		// Build comments with replies first (bottom-up approach)
+		List<Comment> comments = new ArrayList<>();
+		
 		if (dto.getComments() != null && dto.getComments().getData() != null) {
-			List<Comment> comments = dto.getComments().getData().stream().map(c -> {
-
-				
-				Comment comment = new Comment();
-
-				comment.setId(c.getId());
-				comment.setText(c.getText());
-				String iso = languageUtil.detectLanguageIso(c.getText());
-				comment.setLanguageCode(iso);
-				c.setLangType(iso);
-				comment.setTimestamp(LocalDateTime.parse(c.getTimestamp(), IG_FORMATTER));
-
-				if (c.getFrom() != null) {
-					comment.setAccountId(c.getFrom().getId());
-					comment.setUsername(c.getFrom().getUsername());
-				}
-
-				comment.setMedia(media);
-
+			comments = dto.getComments().getData().stream().map(c -> {
+				// Build replies for this comment
+				List<Reply> replies = new ArrayList<>();
 				if (c.getReplies() != null && c.getReplies().getData() != null) {
-					List<Reply> replies = c.getReplies().getData().stream().map(r -> {
-						Reply reply = new Reply();
-						reply.setId(r.getId());
-						reply.setText(r.getText());
-						reply.setTimestamp(LocalDateTime.parse(r.getTimestamp(), IG_FORMATTER));
-
-						if (r.getFrom() != null) {
-							reply.setAccountId(r.getFrom().getId());
-							reply.setUsername(r.getFrom().getUsername());
-						}
-
-						reply.setComment(comment);
-						return reply;
-					}).collect(Collectors.toList());
-
-					comment.setReplies(replies);
-				} else {
-					comment.setReplies(new ArrayList<>());
+					replies = c.getReplies().getData().stream()
+						.map(r -> Reply.builder()
+							.id(r.getId())
+							.text(r.getText())
+							.timestamp(LocalDateTime.parse(r.getTimestamp(), IG_FORMATTER))
+							.accountId(r.getFrom() != null ? r.getFrom().getId() : null)
+							.username(r.getFrom() != null ? r.getFrom().getUsername() : null)
+							.build())
+						.collect(Collectors.toList());
 				}
-
-				return comment;
+				
+				// Build comment with replies
+				return Comment.builder()
+					.id(c.getId())
+					.text(c.getText())
+					.timestamp(LocalDateTime.parse(c.getTimestamp(), IG_FORMATTER))
+					.accountId(c.getFrom() != null ? c.getFrom().getId() : null)
+					.username(c.getFrom() != null ? c.getFrom().getUsername() : null)
+					.replies(replies)
+					.build();
 			}).collect(Collectors.toList());
-
-			media.setComments(comments);
 		}
-
+		
+		// Build Post with all comments
+		Post media = Post.builder()
+			.id(dto.getId())
+			.mediaType(dto.getMediaType())
+			.mediaUrl(dto.getMediaUrl())
+			.permalink(dto.getPermalink())
+			.timestamp(LocalDateTime.parse(dto.getTimestamp(), IG_FORMATTER))
+			.username(dto.getUsername())
+			.likeCount(dto.getLikeCount())
+			.comments(comments)
+			.build();
+		
+		// Set bidirectional relationships
+		comments.forEach(comment -> {
+			comment.setMedia(media);
+			comment.getReplies().forEach(reply -> reply.setComment(comment));
+		});
+		
+		// Save once - cascade will save comments and replies
 		postRepository.save(media);
+		
+		// Collect comment IDs and reply IDs for sentiment analysis
+		List<String> commentIds = comments.stream()
+			.map(Comment::getId)
+			.filter(id -> id != null && !id.isEmpty())
+			.collect(Collectors.toList());
+		
+		List<String> repliedIds = comments.stream()
+			.flatMap(comment -> comment.getReplies().stream())
+			.map(Reply::getId)
+			.filter(id -> id != null && !id.isEmpty())
+			.collect(Collectors.toList());
+		
+		// Call Python REST endpoint for sentiment analysis if there are any IDs
+		if (!commentIds.isEmpty() || !repliedIds.isEmpty()) {
+			try {
+				sentimentService.callPythonSentimentAnalysisEndpoint(commentIds, repliedIds);
+			} catch (Exception e) {
+				logger.error("Error calling Python sentiment analysis endpoint: {}", e.getMessage(), e);
+				// Continue execution even if sentiment analysis call fails
+			}
+		}
 	}
-
+	
 	public JsonNode fetchAndSaveRawResponse() throws Exception {
 
 		// 1. Get RAW JSON from Instagram
