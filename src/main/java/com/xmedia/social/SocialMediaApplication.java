@@ -11,7 +11,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication()
 @EntityScan("com.xmedia.social.*")
 @EnableJpaRepositories(basePackages = {"com.xmedia.social"})
-@EnableFeignClients(basePackages = "com.xmedia.social.base.config")
+@EnableFeignClients(basePackages = "com.xmedia.social.feign.client")
 public class SocialMediaApplication {
     public static void main(String[] args) {
         SpringApplication.run(SocialMediaApplication.class, args);
