@@ -10,10 +10,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.xmedia.social.instagram.dto.InstagramMediaListResponseDto;
 import com.xmedia.social.instagram.dto.InstagramResponseDto;
 import com.xmedia.social.instagram.service.InstagramService;
-import com.fasterxml.jackson.databind.JsonNode;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

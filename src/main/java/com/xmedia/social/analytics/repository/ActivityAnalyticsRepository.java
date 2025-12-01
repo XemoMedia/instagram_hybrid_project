@@ -1,8 +1,5 @@
 package com.xmedia.social.analytics.repository;
 
-import com.xmedia.social.analytics.repository.projection.ActivityTypeProjection;
-import com.xmedia.social.analytics.repository.projection.DailyTotalsProjection;
-import com.xmedia.social.instagram.entity.Post;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -10,6 +7,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import com.xmedia.social.analytics.repository.projection.ActivityTypeProjection;
+import com.xmedia.social.analytics.repository.projection.DailyTotalsProjection;
+import com.xmedia.social.instagram.entity.Post;
 
 
 @Repository

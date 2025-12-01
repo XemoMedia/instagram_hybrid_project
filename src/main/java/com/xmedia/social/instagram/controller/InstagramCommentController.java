@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.xmedia.social.instagram.dto.InstagramCommentDto;
-import com.xmedia.social.instagram.dto.CommentSentimentDto;
 import com.xmedia.social.instagram.service.InstagramCommentService;
 import com.xmedia.social.sentimentanalysis.service.SentimentService;
 

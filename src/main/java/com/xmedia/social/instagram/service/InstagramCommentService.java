@@ -1,13 +1,14 @@
 package com.xmedia.social.instagram.service;
 
-import com.xmedia.social.instagram.dto.InstagramCommentDto;
-import com.xmedia.social.instagram.entity.Comment;
-import com.xmedia.social.instagram.repository.CommentRepository;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import com.xmedia.social.instagram.dto.InstagramCommentDto;
+import com.xmedia.social.instagram.entity.Comment;
+import com.xmedia.social.instagram.repository.CommentRepository;
 
 @Service
 public class InstagramCommentService {

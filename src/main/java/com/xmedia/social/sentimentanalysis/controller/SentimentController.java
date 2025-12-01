@@ -1,17 +1,17 @@
 package com.xmedia.social.sentimentanalysis.controller;
 
-import com.xmedia.social.sentimentanalysis.dto.SentimentDashboardResponseDto;
-import com.xmedia.social.sentimentanalysis.service.SentimentDashboardService;
-import com.xmedia.social.sentimentanalysis.service.SentimentService;
-import com.xmedia.social.instagram.service.InstagramCommentService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.xmedia.social.sentimentanalysis.dto.SentimentDashboardResponseDto;
+import com.xmedia.social.sentimentanalysis.service.SentimentDashboardService;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 
 /**
  * REST controller for sentiment analysis endpoints.

@@ -31,7 +31,7 @@ public class YouTubeComment {
     private String authorChannelUrl;
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "author_channel_id_value", referencedColumnName = "value")
+    @JoinColumn(name = "author_channel_id_value", referencedColumnName = "channel_value")
     private YouTubeAuthorChannelId authorChannelId;
 
     private Boolean canRate;

@@ -1,15 +1,18 @@
 package com.xmedia.social.analytics.service;
 
-import com.xmedia.social.analytics.dto.ActivityTypePointDto;
-import com.xmedia.social.analytics.dto.DailyActivityTotalsDto;
-import com.xmedia.social.analytics.dto.InstagramActivityResponseDto;
-import com.xmedia.social.analytics.repository.ActivityAnalyticsRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
+
+import com.xmedia.social.analytics.dto.ActivityTypePointDto;
+import com.xmedia.social.analytics.dto.DailyActivityTotalsDto;
+import com.xmedia.social.analytics.dto.InstagramActivityResponseDto;
+import com.xmedia.social.analytics.repository.ActivityAnalyticsRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
