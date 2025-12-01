@@ -1,16 +1,15 @@
 package com.xmedia.social.user.entity;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
-
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
 
 @Data
 public class PasswordResetConfirmRequest {
-    @NotBlank
-    private String token;
+	@NotBlank
+	private String token;
 
-    @NotBlank
-    @Size(min = 6, max = 40)
-    private String newPassword;
+	@NotBlank
+	@Size(min = 6, max = 40)
+	private String newPassword;
 }

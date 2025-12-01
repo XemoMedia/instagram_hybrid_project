@@ -7,58 +7,24 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 
-
 @Configuration
 public class SecurityConfig {
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+	@Bean
+	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        http
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/fb/**", "/api/**", "/youtube/**").permitAll()
-                .anyRequest().authenticated()
-            )
-            .oauth2Login(oauth -> oauth
-                .defaultSuccessUrl("/", true)
-            )
-            .logout(logout -> logout
-                .logoutSuccessUrl("/")
-                .permitAll()
-            )
-            .csrf(csrf -> csrf.disable());
+		http.authorizeHttpRequests(auth -> auth
+				.requestMatchers("/login", "/register", "/api/users/create", "/password/reset/**").permitAll()
+				.requestMatchers("/", "/fb/**", "/api/**", "/youtube/**").permitAll().anyRequest().authenticated())
+				.oauth2Login(oauth -> oauth.defaultSuccessUrl("/", true))
+				.logout(logout -> logout.logoutSuccessUrl("/").permitAll()).csrf(csrf -> csrf.disable());
 
-        return http.build();
-    }
-    
-    // 🔹 Add this to provide AuthenticationManager bean
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
-    }
+		return http.build();
+	}
+
+	// 🔹 Add this to provide AuthenticationManager bean
+	@Bean
+	public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+		return config.getAuthenticationManager();
+	}
 }
-
-
-//@Configuration
-//public class SecurityConfig {
-//
-//    @Bean
-//    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-//
-//        http
-//            .csrf(csrf -> csrf.disable())
-//            .authorizeHttpRequests(auth -> auth
-//                .requestMatchers("/", "/fb/**", "/api/**", "/youtube/**").permitAll()
-//                .anyRequest().authenticated()
-//            )
-//            .oauth2Login(oauth -> oauth
-//                .loginPage("/oauth2/authorization/google")  // 👈 NO SPRING LOGIN PAGE
-//            )
-//            .logout(logout -> logout
-//                .logoutSuccessUrl("/logout-success")
-//                .permitAll()
-//            );
-//
-//        return http.build();
-//    }
-//}
