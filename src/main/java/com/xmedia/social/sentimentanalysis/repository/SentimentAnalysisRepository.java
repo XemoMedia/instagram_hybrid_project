@@ -1,16 +1,17 @@
 package com.xmedia.social.sentimentanalysis.repository;
 
+import java.time.OffsetDateTime;
+import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
 import com.xmedia.social.sentimentanalysis.entity.SentimentAnalysisEntity;
 import com.xmedia.social.sentimentanalysis.repository.projection.EmotionShareProjection;
 import com.xmedia.social.sentimentanalysis.repository.projection.SentimentCountProjection;
 import com.xmedia.social.sentimentanalysis.repository.projection.SentimentTrendProjection;
 import com.xmedia.social.sentimentanalysis.repository.projection.SourceBreakdownProjection;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-
-import java.time.OffsetDateTime;
-import java.util.List;
 
 public interface SentimentAnalysisRepository extends JpaRepository<SentimentAnalysisEntity, String> {
 
