@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.xmedia.social.base.enums.SocialMediaType;
 import com.xmedia.social.feign.client.InstagramFeignClient;
 import com.xmedia.social.instagram.dto.InstagramMediaListResponseDto;
 import com.xmedia.social.instagram.dto.InstagramResponseDto;
@@ -227,6 +228,7 @@ public class InstagramService {
 					.username(c.getFrom() != null ? c.getFrom().getUsername() : null)
 					.replies(replies)
 					.languageCode(iso)
+					.socialMediaType(SocialMediaType.INSTAGRAM)
 					.build();
 			}).collect(Collectors.toList());
 		}

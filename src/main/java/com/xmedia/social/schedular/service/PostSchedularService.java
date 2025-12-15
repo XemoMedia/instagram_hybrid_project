@@ -61,8 +61,11 @@ public class PostSchedularService {
 		scheduledPostTO.setCaption(caption);
 		scheduledPostTO.setPlatforms(socialDetailsList);
 		scheduledPostTO.setStatus("SCHEDULED");
-		DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-		scheduledPostTO.setScheduledTime(LocalDateTime.parse(scheduledTime, fmt));
+		//DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+		//scheduledPostTO.setScheduledTime(LocalDateTime.parse(scheduledTime, fmt));
+		scheduledPostTO.setScheduledTime(
+			    LocalDateTime.parse(scheduledTime, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+			);
 		try {
 			if (image != null && !image.isEmpty()) {
 				File f = new File("uploads/" + UUID.randomUUID() + "_" + image.getOriginalFilename());
