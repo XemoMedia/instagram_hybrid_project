@@ -8,10 +8,10 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @EnableScheduling
-@SpringBootApplication()
+@SpringBootApplication(scanBasePackages = "com.xmedia.social")
 @EntityScan("com.xmedia.social.*")
-@EnableJpaRepositories(basePackages = {"com.xmedia.social"})
-@EnableFeignClients(basePackages = "com.xmedia.social.feign.client")
+@EnableJpaRepositories(basePackages = {"com.xmedia.social.*"})
+@EnableFeignClients(basePackages = "com.xmedia.social.feign.*")
 public class SocialMediaApplication {
     public static void main(String[] args) {
         SpringApplication.run(SocialMediaApplication.class, args);
