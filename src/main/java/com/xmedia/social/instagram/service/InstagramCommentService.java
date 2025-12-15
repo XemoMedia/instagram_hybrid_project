@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.xmedia.social.base.enums.SocialMediaType;
 import com.xmedia.social.instagram.dto.InstagramCommentDto;
 import com.xmedia.social.instagram.entity.Comment;
 import com.xmedia.social.instagram.repository.CommentRepository;
@@ -50,6 +51,29 @@ public class InstagramCommentService {
                 comment.getMedia() != null ? comment.getMedia().getId() : null
                 );
         
+    }
+    
+    public InstagramCommentDto fetchLatestInstagramComment() {
+
+        Comment comment = commentRepository
+                .findFirstBySocialMediaTypeOrderByTimestampDesc(SocialMediaType.INSTAGRAM)
+                .orElseThrow(() -> new RuntimeException("No Instagram comments found"));
+
+        return mapToDto(comment);
+    }
+    
+    private InstagramCommentDto mapToDto(Comment comment) {
+
+        return new InstagramCommentDto(
+                comment.getId(),
+                comment.getText(),
+                comment.getTimestamp(),
+                comment.getAccountId(),          // fromId
+                comment.getUsername(),           // fromUsername
+                comment.getMedia() != null
+                        ? comment.getMedia().getId()
+                        : null
+        );
     }
 }
 

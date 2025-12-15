@@ -14,7 +14,7 @@ import java.util.Date;
 public class JwtUtils {
     private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
 
-    @Value("${instagram.app.jwtSecret}")
+   // @Value("${instagram.app.jwtSecret}")
     private String jwtSecret;
 
 //    @Value("${instagram.app.jwtExpirationMs}")

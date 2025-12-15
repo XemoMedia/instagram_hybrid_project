@@ -110,5 +110,20 @@ public class InstagramCommentController {
         List<InstagramCommentDto> comments = instagramCommentService.getCommentsByMediaId(mediaId);
         return ResponseEntity.ok(comments);
     }
+	
+	@GetMapping("/post/latest")
+	public ResponseEntity<?> getLatestInstagramComment() {
+
+	    try {
+	        InstagramCommentDto dto =
+	                instagramCommentService.fetchLatestInstagramComment();
+
+	        return ResponseEntity.ok(dto);
+
+	    } catch (RuntimeException ex) {
+	        return ResponseEntity.noContent().build();
+	    }
+	}
+
 }
 

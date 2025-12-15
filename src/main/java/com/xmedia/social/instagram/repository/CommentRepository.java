@@ -1,10 +1,12 @@
 package com.xmedia.social.instagram.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import com.xmedia.social.base.enums.SocialMediaType;
 import com.xmedia.social.instagram.entity.Comment;
 
 @Repository
@@ -16,5 +18,9 @@ public interface CommentRepository extends JpaRepository<Comment, String> {
 	List<Comment> findAll();
 
 	List<Comment> findByMedia_Id(String mediaId);
+	
+	Optional<Comment> findFirstBySocialMediaTypeOrderByTimestampDesc(
+            SocialMediaType socialMediaType
+    );
 }
 

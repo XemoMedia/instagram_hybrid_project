@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <title>Scheduler v7.2</title>
+ <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<h2>📅 Social Media Scheduler (All Platforms)</h2>
+
+<textarea id="caption" placeholder="Caption"></textarea><br>
+
+<h4>Select Platforms</h4>
+<label><input type="checkbox" value="FACEBOOK"> Facebook</label>
+<label><input type="checkbox" value="INSTAGRAM"> Instagram</label>
+<label><input type="checkbox" value="LINKEDIN"> LinkedIn</label>
+<label><input type="checkbox" value="X"> X (Twitter)</label>
+<label><input type="checkbox" value="YOUTUBE"> YouTube</label>
+<label><input type="checkbox" value="THREADS"> Threads</label>
+<label><input type="checkbox" value="PINTEREST"> Pinterest</label>
+<label><input type="checkbox" value="REDDIT"> Reddit</label>
+<label><input type="checkbox" value="TIKTOK"> TikTok</label><br><br>
+
+<input type="file" id="image">
+<input type="file" id="video"><br>
+
+<input type="datetime-local" id="time">
+<button onclick="save()">Schedule</button>
+
+<ul id="list"></ul>
+
+<script src="js/app.js"></script>
+</body>
+</html>

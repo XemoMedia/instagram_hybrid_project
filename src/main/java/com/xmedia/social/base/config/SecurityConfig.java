@@ -13,20 +13,29 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    	
+    	http
+        .csrf(csrf -> csrf.disable())
+        .authorizeHttpRequests(auth -> auth
+            .requestMatchers("/**").permitAll()
+        )
+        .httpBasic(basic -> basic.disable())
+        .formLogin(form -> form.disable());
 
-        http
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/fb/**", "/api/**", "/youtube/**").permitAll()
-                .anyRequest().authenticated()
-            )
-            .oauth2Login(oauth -> oauth
-                .defaultSuccessUrl("/", true)
-            )
-            .logout(logout -> logout
-                .logoutSuccessUrl("/")
-                .permitAll()
-            )
-            .csrf(csrf -> csrf.disable());
+
+//        http
+//            .authorizeHttpRequests(auth -> auth
+//                .requestMatchers("/", "/fb/**", "/api/**", "/youtube/**").permitAll()
+//                .anyRequest().authenticated()
+//            )
+//            .oauth2Login(oauth -> oauth
+//                .defaultSuccessUrl("/", true)
+//            )
+//            .logout(logout -> logout
+//                .logoutSuccessUrl("/")
+//                .permitAll()
+//            )
+//            .csrf(csrf -> csrf.disable());
 
         return http.build();
     }
