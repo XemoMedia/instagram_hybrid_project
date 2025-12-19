@@ -5,5 +5,6 @@ import lombok.Data;
 @Data
 public class MediaCreationResponse {
     private String id;
+    private String statusCode;
 }
 

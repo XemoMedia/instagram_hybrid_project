@@ -27,6 +27,8 @@ public class InstagramVideoPost {
 
     @Column(columnDefinition = "TEXT")
     private String caption;
+    
+    private String mediaType;
 
     private String creationId;
     private String publishId;

@@ -1,9 +1,10 @@
 package com.xmedia.social.instagram.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.xmedia.social.base.enums.VideoStatus;
@@ -30,69 +31,193 @@ public class InstagramVideoAsyncService {
     private String accessToken;
 
     @Async
-    @Retryable(
-        retryFor = Exception.class,
-        maxAttempts = 3,
-        backoff = @Backoff(delay = 10000)
-    )
     public void processVideoAsync(InstagramVideoPost post) {
 
         try {
-            // STEP 1: CREATE VIDEO CONTAINER
-            MediaCreationResponse response =
-                graphClient.createVideoMedia(
-                    igUserId,
-                    "VIDEO",
-                    post.getVideoUrl(),
-                    post.getCaption(),
-                    accessToken
-                );
 
-            post.setCreationId(response.getId());
-            post.setStatus(VideoStatus.IN_PROGRESS);
-            repository.save(post);
+            // 1️⃣ CREATE CONTAINER (ONLY ONCE)
+            if (post.getCreationId() == null) {
 
-            // STEP 2: CHECK STATUS
+                MediaCreationResponse response =
+                    graphClient.createVideoMedia(
+                        igUserId,
+                        "REELS",
+                        post.getVideoUrl(),
+                        post.getCaption(),
+                        accessToken
+                    );
+
+                post.setCreationId(response.getId());
+                post.setStatus(VideoStatus.IN_PROGRESS);
+                repository.save(post);
+
+                return; // 🔴 IMPORTANT → wait before checking status
+            }
+
+            // 2️⃣ CHECK STATUS
             MediaStatusResponse statusResponse =
                 graphClient.getMediaStatus(
-                    response.getId(),
+                    post.getCreationId(),
                     "status_code",
                     accessToken
                 );
 
-            if ("IN_PROGRESS".equals(statusResponse.getStatus_code())) {
-                throw new RuntimeException("Video still processing");
-            }
+            switch (statusResponse.getStatus_code()) {
 
-            if ("ERROR".equals(statusResponse.getStatus_code())) {
-                post.setStatus(VideoStatus.ERROR);
-                repository.save(post);
-                return;
-            }
+                case "IN_PROGRESS":
+                    post.setStatus(VideoStatus.IN_PROGRESS);
+                    repository.save(post);
+                   // retryLater(post); // 🔥 schedule retry
+                    break;
 
-            if ("FINISHED".equals(statusResponse.getStatus_code())) {
+                case "FINISHED":
+                    InstagramPublishResponse publish =
+                        graphClient.publishMedia(
+                            igUserId,
+                            post.getCreationId(),
+                            accessToken
+                        );
 
-                post.setStatus(VideoStatus.FINISHED);
-                repository.save(post);
+                    post.setPublishId(publish.getId());
+                    post.setStatus(VideoStatus.PUBLISHED);
+                    repository.save(post);
+                    break;
 
-                // STEP 3: PUBLISH
-                InstagramPublishResponse publish =
-                    graphClient.publishMedia(
-                        igUserId,
-                        post.getCreationId(),
-                        accessToken
-                    );
-
-                post.setPublishId(publish.getId());
-                post.setStatus(VideoStatus.PUBLISHED);
-                repository.save(post);
+                case "ERROR":
+                    post.setStatus(VideoStatus.ERROR);
+                    repository.save(post);
+                    break;
             }
 
         } catch (Exception ex) {
             post.setRetryCount(post.getRetryCount() + 1);
             repository.save(post);
-            throw ex;
+           // retryLater(post);
         }
     }
+  
+
+    
+   
+//    public void processVideoAsync(InstagramVideoPost post) {
+//
+//        try {
+//            // CREATE CONTAINER (only once)
+//            if (post.getCreationId() == null) {
+//                MediaCreationResponse response =
+//                    graphClient.createVideoMedia(
+//                        igUserId,
+//                        "REELS",
+//                        post.getVideoUrl(),
+//                        post.getCaption(),
+//                        accessToken
+//                    );
+//
+//                post.setCreationId(response.getId());
+//                post.setStatus(VideoStatus.valueOf(response.getStatusCode()));
+//
+//                post.setMediaType("REELS");
+//                repository.save(post);
+//            }
+//
+//            // CHECK STATUS
+//            MediaStatusResponse statusResponse =
+//                graphClient.getMediaStatus(
+//                    post.getCreationId(),
+//                    "status_code",
+//                    accessToken
+//                );
+//
+//            switch (statusResponse.getStatus_code()) {
+//
+////                case "IN_PROGRESS":
+////                    post.setStatus(VideoStatus.IN_PROGRESS);
+////                    repository.save(post);
+////                    return;
+////
+////                case "ERROR":
+////                    post.setStatus(VideoStatus.ERROR);
+////                    repository.save(post);
+////                    return;
+//
+//                case "FINISHED":
+//                	InstagramPublishResponse publish =
+//                        graphClient.publishMedia(
+//                            igUserId,
+//                            post.getCreationId(),
+//                            accessToken
+//                        );
+//
+//                    post.setPublishId(publish.getId());
+//                    post.setStatus(VideoStatus.PUBLISHED);
+//                    repository.save(post);
+//                    return;
+//            }
+//
+//        } catch (Exception ex) {
+//            post.setRetryCount(post.getRetryCount() + 1);
+//            repository.save(post);
+//        }
+//    }
+
+//    public void processVideoAsync(InstagramVideoPost post) {
+//
+//        try {
+//            // STEP 1: CREATE VIDEO CONTAINER
+//            MediaCreationResponse response =
+//                graphClient.createVideoMedia(
+//                    igUserId,
+//                    "REELS",
+//                    post.getVideoUrl(),
+//                    post.getCaption(),
+//                    accessToken
+//                );
+//
+//            post.setCreationId(response.getId());
+//            post.setStatus(VideoStatus.IN_PROGRESS);
+//            repository.save(post);
+//
+//            // STEP 2: CHECK STATUS
+//            MediaStatusResponse statusResponse =
+//                graphClient.getMediaStatus(
+//                    response.getId(),
+//                    "status_code",
+//                    accessToken
+//                );
+//
+//            if ("IN_PROGRESS".equals(statusResponse.getStatus_code())) {
+//                throw new RuntimeException("Video still processing");
+//            }
+//
+//            if ("ERROR".equals(statusResponse.getStatus_code())) {
+//                post.setStatus(VideoStatus.ERROR);
+//                repository.save(post);
+//                return;
+//            }
+//
+//            if ("FINISHED".equals(statusResponse.getStatus_code())) {
+//
+//                post.setStatus(VideoStatus.FINISHED);
+//                repository.save(post);
+//
+//                // STEP 3: PUBLISH
+//                InstagramPublishResponse publish =
+//                    graphClient.publishMedia(
+//                        igUserId,
+//                        post.getCreationId(),
+//                        accessToken
+//                    );
+//
+//                post.setPublishId(publish.getId());
+//                post.setStatus(VideoStatus.PUBLISHED);
+//                repository.save(post);
+//            }
+//
+//        } catch (Exception ex) {
+//            post.setRetryCount(post.getRetryCount() + 1);
+//            repository.save(post);
+//            throw ex;
+//        }
+//    }
 }
 

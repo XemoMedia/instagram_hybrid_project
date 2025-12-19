@@ -29,11 +29,11 @@ public class InstagramAsyncService {
 	private String accessToken;
 
     @Async
-    @Retryable(
-            retryFor = Exception.class,
-            maxAttempts = 3,
-            backoff = @Backoff(delay = 5000)
-    )
+//    @Retryable(
+//            retryFor = Exception.class,
+//            maxAttempts = 3,
+//            backoff = @Backoff(delay = 5000)
+//    )
     public void processPostAsync(InstagramPost post) {
 
         try {

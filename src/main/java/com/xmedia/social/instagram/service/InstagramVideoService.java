@@ -1,6 +1,8 @@
 package com.xmedia.social.instagram.service;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
@@ -9,7 +11,6 @@ import com.xmedia.social.instagram.dto.ApiPostResponse;
 import com.xmedia.social.instagram.dto.InstagramVideoPost;
 import com.xmedia.social.instagram.repository.InstagramVideoRepository;
 
-import io.swagger.v3.oas.models.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -34,4 +35,44 @@ public class InstagramVideoService {
 
 		return new ApiPostResponse(true, "Video upload started", post.getId());
 	}
+	
+	public ApiPostResponse getLatestVideoStatus() {
+
+	    InstagramVideoPost post = repository.findTopByOrderByCreatedAtDesc()
+	            .orElseThrow(() -> new RuntimeException("No video posts found"));
+
+	    return new ApiPostResponse(
+	            true,
+	            post.getStatus().name(),
+	            buildResponse(post)
+	    );
+	}
+
+	
+//	public ApiPostResponse getVideoStatus(Long id) {
+//
+//        InstagramVideoPost post = repository.findById(id)
+//                .orElseThrow(() -> new RuntimeException("Video post not found"));
+//
+//        return new ApiPostResponse(
+//                true,
+//                post.getStatus().name(),   // CREATED / IN_PROGRESS / PUBLISHED / ERROR
+//                buildResponse(post)
+//        );
+//    }
+
+    private Map<String, Object> buildResponse(InstagramVideoPost post) {
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("id", post.getId());
+        data.put("status", post.getStatus());
+        data.put("creationId", post.getCreationId());
+        data.put("publishId", post.getPublishId());
+        data.put("retryCount", post.getRetryCount());
+        data.put("videoUrl", post.getVideoUrl());
+        data.put("caption", post.getCaption());
+        data.put("createdAt", post.getCreatedAt());
+
+        return data;
+    }
 }

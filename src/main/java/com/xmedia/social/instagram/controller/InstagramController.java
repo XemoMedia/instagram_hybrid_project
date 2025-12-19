@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.xmedia.social.instagram.dto.ApiPostResponse;
 import com.xmedia.social.instagram.dto.InstagramMediaListResponseDto;
 import com.xmedia.social.instagram.dto.InstagramResponseDto;
+import com.xmedia.social.instagram.dto.InstagramVideoPost;
 import com.xmedia.social.instagram.service.InstagramPostService;
 import com.xmedia.social.instagram.service.InstagramService;
 import com.xmedia.social.instagram.service.InstagramVideoService;
@@ -107,4 +108,11 @@ public class InstagramController {
 	public ResponseEntity<ApiPostResponse> postVideo(@RequestParam("video_url") String videoUrl, @RequestParam("caption") String caption) {
 		return ResponseEntity.ok(videoService.createVideoPost(videoUrl, caption));
 	}
+	
+	// Fetch latest
+	@GetMapping("/post-video/status/latest")
+	public ResponseEntity<ApiPostResponse> getLatestVideoStatus() {
+	    return ResponseEntity.ok(videoService.getLatestVideoStatus());
+	}
+
 }

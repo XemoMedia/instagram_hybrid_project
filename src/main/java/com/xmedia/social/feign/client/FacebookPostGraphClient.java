@@ -29,7 +29,7 @@ public interface FacebookPostGraphClient {
 			@RequestParam("video_url") String videoUrl, @RequestParam("caption") String caption,
 			@RequestParam("access_token") String accessToken);
 
-	@GetMapping("/{creationId}")
+	@GetMapping(value = "/{creationId}", consumes = MediaType.APPLICATION_JSON_VALUE)
 	MediaStatusResponse getMediaStatus(@PathVariable String creationId, @RequestParam("fields") String fields,
 			@RequestParam("access_token") String accessToken);
 
