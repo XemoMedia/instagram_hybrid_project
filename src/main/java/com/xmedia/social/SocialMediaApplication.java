@@ -4,6 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.cloud.openfeign.EnableFeignClients;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
@@ -11,6 +12,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication()
 @EntityScan("com.xmedia.social.*")
 @EnableJpaRepositories(basePackages = {"com.xmedia.social"})
+@EnableJpaAuditing
 @EnableFeignClients(basePackages = "com.xmedia.social.feign.client")
 public class SocialMediaApplication {
     public static void main(String[] args) {
