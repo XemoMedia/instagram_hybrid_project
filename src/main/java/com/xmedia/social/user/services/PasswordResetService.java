@@ -1,14 +1,18 @@
 package com.xmedia.social.user.services;
 
-import com.xmedia.social.user.model.User;
-import com.xmedia.social.user.repository.UserRepository;
-
-import lombok.RequiredArgsConstructor;
+import java.time.LocalDateTime;
+import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import com.xmedia.social.user.model.PasswordResetToken;
+import com.xmedia.social.user.model.User;
+import com.xmedia.social.user.repository.PasswordResetTokenRepository;
+import com.xmedia.social.user.repository.UserRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -16,6 +20,7 @@ public class PasswordResetService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final PasswordResetTokenRepository tokenRepository;
 
 //    public PasswordResetService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
 //        this.userRepository = userRepository;
@@ -52,5 +57,23 @@ public class PasswordResetService {
         userRepository.save(user);
 
         return "Password has been reset successfully.";
+    }
+    
+ // 1️⃣ Create token and send via email (simplified)
+    public String createPasswordResetToken(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+
+        String token = UUID.randomUUID().toString();
+
+        PasswordResetToken resetToken = new PasswordResetToken();
+        resetToken.setToken(token);
+        resetToken.setUser(user);
+        resetToken.setExpiryDate(LocalDateTime.now().plusMinutes(30)); // token valid 30 min
+
+        tokenRepository.save(resetToken);
+
+        // In real app → send token to user email
+        return "Password reset token generated. Token: " + token;
     }
 }

@@ -158,7 +158,7 @@ public class FacebookPageService {
 		}
 
 		// Save JSON to DB
-		saveTokenJson(longResp);
+		//saveTokenJson(longResp);
 
 		saveTokenJsonDb(longResp);
 
