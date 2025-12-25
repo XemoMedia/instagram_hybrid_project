@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.xmedia.social.base.enums.SocialMediaType;
 import com.xmedia.social.feign.client.InstagramFeignClient;
 import com.xmedia.social.instagram.dto.InstagramMediaListResponseDto;
 import com.xmedia.social.instagram.dto.InstagramResponseDto;
@@ -192,10 +193,19 @@ public class InstagramService {
 		List<Comment> comments = new ArrayList<>();
 		
 		if (dto.getComments() != null && dto.getComments().getData() != null) {
+			//String iso =null;
 			comments = dto.getComments().getData().stream().map(c -> {
 				// Build replies for this comment
+				
+				String iso = null;
+			    if (c.getText()!= null) {
+			        iso = languageUtil.detectLanguageIso(c.getText());
+			    }
 				List<Reply> replies = new ArrayList<>();
+				
+				
 				if (c.getReplies() != null && c.getReplies().getData() != null) {
+					iso = languageUtil.detectLanguageIso(c.getText());
 					replies = c.getReplies().getData().stream()
 						.map(r -> Reply.builder()
 							.id(r.getId())
@@ -207,6 +217,8 @@ public class InstagramService {
 						.collect(Collectors.toList());
 				}
 				
+				 c.setLangType(iso);
+				
 				// Build comment with replies
 				return Comment.builder()
 					.id(c.getId())
@@ -215,6 +227,8 @@ public class InstagramService {
 					.accountId(c.getFrom() != null ? c.getFrom().getId() : null)
 					.username(c.getFrom() != null ? c.getFrom().getUsername() : null)
 					.replies(replies)
+					.languageCode(iso)
+					.socialMediaType(SocialMediaType.INSTAGRAM)
 					.build();
 			}).collect(Collectors.toList());
 		}

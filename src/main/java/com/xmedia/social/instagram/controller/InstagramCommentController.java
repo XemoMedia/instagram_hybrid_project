@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.xmedia.social.instagram.dto.InstagramCommentDto;
-import com.xmedia.social.instagram.dto.CommentSentimentDto;
 import com.xmedia.social.instagram.service.InstagramCommentService;
 import com.xmedia.social.sentimentanalysis.service.SentimentService;
 
@@ -111,5 +110,20 @@ public class InstagramCommentController {
         List<InstagramCommentDto> comments = instagramCommentService.getCommentsByMediaId(mediaId);
         return ResponseEntity.ok(comments);
     }
+	
+	@GetMapping("/post/latest")
+	public ResponseEntity<?> getLatestInstagramComment() {
+
+	    try {
+	        InstagramCommentDto dto =
+	                instagramCommentService.fetchLatestInstagramComment();
+
+	        return ResponseEntity.ok(dto);
+
+	    } catch (RuntimeException ex) {
+	        return ResponseEntity.noContent().build();
+	    }
+	}
+
 }
 

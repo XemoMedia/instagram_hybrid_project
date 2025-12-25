@@ -1,5 +1,6 @@
 package com.xmedia.social.youtube.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
@@ -14,5 +15,6 @@ import lombok.NoArgsConstructor;
 @Entity
 public class YouTubeAuthorChannelId {
     @Id
+    @Column(name="channel_value")
     private String value;
 }

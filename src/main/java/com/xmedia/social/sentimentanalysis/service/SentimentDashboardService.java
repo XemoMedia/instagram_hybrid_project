@@ -1,20 +1,24 @@
 package com.xmedia.social.sentimentanalysis.service;
 
-import com.xmedia.social.sentimentanalysis.dto.*;
-import com.xmedia.social.sentimentanalysis.entity.SentimentAnalysisEntity;
-import com.xmedia.social.sentimentanalysis.repository.SentimentAnalysisRepository;
-
-import com.xmedia.social.sentimentanalysis.repository.projection.SentimentCountProjection;
-
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
-
 import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+
+import com.xmedia.social.sentimentanalysis.dto.EmotionShareDto;
+import com.xmedia.social.sentimentanalysis.dto.SentimentCountsDto;
+import com.xmedia.social.sentimentanalysis.dto.SentimentDashboardResponseDto;
+import com.xmedia.social.sentimentanalysis.dto.SentimentSampleDto;
+import com.xmedia.social.sentimentanalysis.dto.SentimentTrendPointDto;
+import com.xmedia.social.sentimentanalysis.dto.SourceBreakdownDto;
+import com.xmedia.social.sentimentanalysis.entity.SentimentAnalysisEntity;
+import com.xmedia.social.sentimentanalysis.repository.SentimentAnalysisRepository;
+import com.xmedia.social.sentimentanalysis.repository.projection.SentimentCountProjection;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor

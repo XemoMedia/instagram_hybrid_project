@@ -2,6 +2,7 @@ package com.xmedia.social.instagram.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.xmedia.social.base.dto.Comments;
+
 import lombok.Data;
 
 @Data

@@ -56,4 +56,7 @@ public class Comment extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "social_media_type")
     private SocialMediaType socialMediaType;
+    
+    @Column(name = "language_code")
+    private String languageCode;
 }

@@ -1,6 +1,7 @@
 package com.xmedia.social.analytics.dto;
 
 import java.util.List;
+
 import lombok.Builder;
 import lombok.Value;
 
