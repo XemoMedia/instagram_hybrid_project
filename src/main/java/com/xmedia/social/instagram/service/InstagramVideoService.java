@@ -48,18 +48,7 @@ public class InstagramVideoService {
 	    );
 	}
 
-	
-//	public ApiPostResponse getVideoStatus(Long id) {
-//
-//        InstagramVideoPost post = repository.findById(id)
-//                .orElseThrow(() -> new RuntimeException("Video post not found"));
-//
-//        return new ApiPostResponse(
-//                true,
-//                post.getStatus().name(),   // CREATED / IN_PROGRESS / PUBLISHED / ERROR
-//                buildResponse(post)
-//        );
-//    }
+
 
     private Map<String, Object> buildResponse(InstagramVideoPost post) {
 

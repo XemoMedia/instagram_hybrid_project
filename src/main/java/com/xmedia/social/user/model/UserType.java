@@ -4,6 +4,7 @@ public enum UserType {
    GOOGLE,
    FACEBOOK,
    YOUTUBE,
-   INSTAGRAM
+   INSTAGRAM,
+   NORMAL
    
 }
