@@ -30,6 +30,9 @@ public class SocialCommentAnalysis extends BaseEntity {
 
     @Column(length = 128)
     private String username;
+    
+    @Column
+    private String msgId;
 
     @Column(columnDefinition = "TEXT")
     private String comment;

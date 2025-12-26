@@ -7,7 +7,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -50,22 +53,37 @@ public class FileUploadService {
 	public int uploadFileData(UploadRequestInputDto uploadRequest) throws IOException {
 		validateUploadRequest(uploadRequest);
 
-		List<Map<String, String>> records;
-		try (InputStream inputStream = uploadRequest.getFile().getInputStream()) {
-			records = locateConverter(uploadRequest.getDataSource()).convert(inputStream);
+		 List<Map<String, String>> records;
+		    try (InputStream inputStream = uploadRequest.getFile().getInputStream()) {
+		        records = locateConverter(uploadRequest.getDataSource()).convert(inputStream);
+		    }
+
+		    if (records == null || records.isEmpty()) {
+		        return 0;
+		    }
+
+		    // 1️⃣ Extract msgIds from Excel
+		    Set<String> excelMsgIds = records.stream()
+		            .map(this::normalizeKeys)
+		            .map(m -> value(m, "msgid"))
+		            .filter(Objects::nonNull)
+		            .collect(Collectors.toSet());
+
+		    // 2️⃣ Find existing msgIds in DB
+		    Set<String> existingMsgIds =
+		    		socialCommentAnalysisRepository.findExistingMsgIds(excelMsgIds);
+
+
+		    // 3️⃣ Save only NEW records
+		    List<SocialCommentAnalysis> entities = records.stream()
+		            .map(this::mapRecordToSocialCommentAnalysis)
+		            .filter(e -> !existingMsgIds.contains(e.getMsgId()))
+		            .toList();
+
+		    socialCommentAnalysisRepository.saveAll(entities);
+		    return entities.size();
 		}
 
-		if (records == null || records.isEmpty()) {
-			return 0;
-		}
-
-		List<SocialCommentAnalysis> entities = records.stream()
-				.map(this::mapRecordToSocialCommentAnalysis)
-				.toList();
-
-		socialCommentAnalysisRepository.saveAll(entities);
-		return entities.size();
-	}
 
 	public void deleteAllSocialCommentAnalysis() {
 		socialCommentAnalysisRepository.deleteAllInBatch();
@@ -106,9 +124,10 @@ public class FileUploadService {
 	private SocialCommentAnalysis mapRecordToSocialCommentAnalysis(Map<String, String> record) {
 		Map<String, String> normalized = normalizeKeys(record);
 		String commentId = valueOrDefault(normalized, "id", UUID.randomUUID().toString());
-
-        return SocialCommentAnalysis.builder()
+		
+	    return SocialCommentAnalysis.builder()
                 .id(commentId)
+                .msgId(value(normalized,"msgid"))
                 .username(value(normalized, "username"))
                 .comment(value(normalized, "comment"))
                 .platform(value(normalized, "platform"))
@@ -143,4 +162,5 @@ public class FileUploadService {
 		return value != null ? value : defaultValue;
 	}
 }
+
 

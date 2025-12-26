@@ -62,5 +62,8 @@ public class MediaAnalysisAnalytic extends BaseEntity {
 
 	@Column(columnDefinition = "TEXT")
 	private String notes;
+	
+	@Column(name = "risk_index")
+    private Double riskIndex;
 }
 
